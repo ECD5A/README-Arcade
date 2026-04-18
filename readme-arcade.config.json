@@ -43,19 +43,5 @@
     "holdFrames": 12,
     "titleLeft": "MATRIX",
     "titleRight": ""
-  },
-  "hashwave": {
-    "frames": 120,
-    "duration": "42s",
-    "holdFrames": 12,
-    "titleLeft": "HASHWAVE",
-    "titleRight": ""
-  },
-  "boot": {
-    "frames": 108,
-    "duration": "38s",
-    "holdFrames": 14,
-    "titleLeft": "BOOT",
-    "titleRight": ""
   }
 }

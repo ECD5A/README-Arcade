@@ -31,9 +31,9 @@ def render_matrix_frame(user: str, theme: dict[str, str], width: int, height: in
             if grid[y][x] != theme["level0"]:
                 continue
             residue = stable_byte(user, f"matrix-residue:{residue_tick}:{x}:{y}")
-            if residue < 96:
+            if residue < 56:
                 grid[y][x] = theme["level1"]
-            elif residue < 128:
+            elif residue < 76:
                 grid[y][x] = theme["level2"]
 
     return grid

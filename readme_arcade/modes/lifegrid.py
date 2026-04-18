@@ -290,8 +290,8 @@ def make_svg(
             f'font-size="12">{escape(title_right)}</text>'
         )
 
-    boot_state = states[0]
-    animation_states = [boot_state] * max(0, hold_frames) + states
+    initial_state = states[0]
+    animation_states = [initial_state] * max(0, hold_frames) + states
 
     for y in range(height):
         for x in range(width):
