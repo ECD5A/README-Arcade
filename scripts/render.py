@@ -13,13 +13,14 @@ sys.path.insert(0, str(ROOT))
 
 from readme_arcade.config import load_config
 from readme_arcade.github import fetch_calendar
-from readme_arcade.modes import lifegrid, matrix, snake
+from readme_arcade.modes import defrag, lifegrid, matrix, snake
 
 
 MODES = {
     "lifegrid": lifegrid.render,
     "snake": snake.render,
     "matrix": matrix.render,
+    "defrag": defrag.render,
 }
 
 

@@ -69,8 +69,8 @@ def manhattan(a: Position, b: Position) -> int:
     return abs(a[0] - b[0]) + abs(a[1] - b[1])
 
 
-def name_grid(user: str, width: int, height: int, theme: dict[str, str]) -> list[list[str]]:
-    grid = base_grid(theme, width, height)
+def name_food(user: str, width: int, height: int) -> dict[Position, int]:
+    cells: dict[Position, int] = {}
     text = "".join(ch for ch in user.upper() if ch in FONT_5X7)[:8] or "README"
     text_width = (len(text) * 6) - 1
     if text_width > width:
@@ -90,9 +90,69 @@ def name_grid(user: str, width: int, height: int, theme: dict[str, str]) -> list
                 x = gx + dx
                 if value == "1" and 0 <= x < width:
                     level = 1 + ((stable_byte(user, f"name:{index}:{dx}:{y}") + x + gy) % 4)
-                    grid[gy][x] = theme[f"level{level}"]
+                    cells[(x, gy)] = level
+
+    return cells
+
+
+def name_grid(user: str, width: int, height: int, theme: dict[str, str]) -> list[list[str]]:
+    grid = base_grid(theme, width, height)
+    for (x, y), level in name_food(user, width, height).items():
+        grid[y][x] = theme[f"level{level}"]
 
     return grid
+
+
+def body_from_head(
+    head: Position,
+    length: int,
+    width: int,
+    height: int,
+    blocked: set[Position] | None = None,
+) -> list[Position]:
+    hx, hy = head
+    occupied = blocked or set()
+    trails = (
+        [(-offset, 0) for offset in range(length)],
+        [(offset, 0) for offset in range(length)],
+        [(0, -offset) for offset in range(length)],
+        [(0, offset) for offset in range(length)],
+    )
+
+    for offsets in trails:
+        body = [(hx + dx, hy + dy) for dx, dy in offsets]
+        if (
+            len(set(body)) == length
+            and all(0 <= x < width and 0 <= y < height for x, y in body)
+            and not occupied.intersection(body)
+        ):
+            return body
+
+    return initial_body(width, height, length, hy, hx)
+
+
+def choose_name_head(
+    user: str,
+    cells: list[Position],
+    actor: str,
+    width: int,
+    height: int,
+    used: set[Position] | None = None,
+) -> Position:
+    blocked = used or set()
+    candidates = [pos for pos in cells if pos not in blocked]
+    if not candidates:
+        return (min(width - 2, max(1, width // 3)), height // 2)
+
+    target_x = width // 3 if actor == "snake" else (width * 2) // 3
+    target_y = height // 2 if actor == "snake" else max(0, (height // 2) - 2)
+    return min(
+        candidates,
+        key=lambda pos: (
+            manhattan(pos, (target_x, target_y)),
+            stable_byte(user, f"{actor}:name-head:{pos[0]}:{pos[1]}"),
+        ),
+    )
 
 
 def initial_body(
@@ -159,6 +219,26 @@ def build_food(user: str, width: int, height: int, calendar: dict | None, blocke
             dark_cells.append(pos)
 
     return food
+
+
+def reveal_field_food(
+    user: str,
+    food: dict[Position, int],
+    field_food: dict[Position, int],
+    frame: int,
+    reveal_frames: int,
+    blocked: set[Position],
+) -> None:
+    if reveal_frames <= 0:
+        threshold = 255
+    else:
+        threshold = min(255, int(((frame + 1) / reveal_frames) * 255))
+
+    for pos, level in list(field_food.items()):
+        if pos in blocked or pos in food:
+            continue
+        if stable_byte(user, f"snake-field:{pos[0]}:{pos[1]}") <= threshold:
+            food[pos] = level
 
 
 def choose_target(user: str, head: Position, food: dict[Position, int], theme_name: str, actor: str) -> Position | None:
@@ -303,6 +383,7 @@ def build_frames(user: str, options: dict[str, Any], calendar: dict | None, them
     height = box["height"]
     frames = int(options.get("frames", 120))
     intro_frames = min(max(1, int(options.get("holdFrames", 12))), frames - 1)
+    transition_frames = min(max(0, int(options.get("transitionFrames", 14))), frames - intro_frames - 1)
     start_length = min(max(4, int(options.get("length", 6))), max(4, width - 4))
     max_length = max(start_length, int(options.get("maxLength", 7)))
     grow_per_food = max(0, int(options.get("growPerFood", 0)))
@@ -312,17 +393,30 @@ def build_frames(user: str, options: dict[str, Any], calendar: dict | None, them
     worm_speed = min(max(1, int(options.get("wormSpeed", 2))), 4)
     worm_grow_per_food = max(0, int(options.get("wormGrowPerFood", 0)))
 
-    body = initial_body(width, height, start_length)
-    worm_row = max(0, (height // 2) - 2)
-    worm_head_x = max(1, width - worm_length - 4)
-    worm_body = initial_body(width, height, worm_length, worm_row, worm_head_x, -1) if worm_enabled else []
-    food = build_food(user, width, height, calendar, set(body) | set(worm_body))
+    letter_food = name_food(user, width, height)
+    letter_cells = list(letter_food)
+    body = body_from_head(choose_name_head(user, letter_cells, "snake", width, height), start_length, width, height)
+    worm_body: list[Position] = []
+    if worm_enabled:
+        worm_head = choose_name_head(user, letter_cells, "worm", width, height, set(body))
+        worm_body = body_from_head(worm_head, worm_length, width, height, set(body))
+
+    blocked = set(body) | set(worm_body)
+    field_food = build_food(user, width, height, calendar, blocked | set(letter_food))
+    food = {pos: level for pos, level in letter_food.items() if pos not in blocked}
 
     rendered: list[list[list[str]]] = [name_grid(user, width, height, theme) for _ in range(intro_frames)]
     growth = 0
     worm_growth = 0
 
     for frame in range(frames - intro_frames):
+        reveal_step = min(frame, max(0, transition_frames - 1))
+        reveal_field_food(user, food, field_food, reveal_step, transition_frames, set(body) | set(worm_body))
+
+        actors = [(worm_colors, worm_body), (snake_colors, body)] if worm_enabled else [(snake_colors, body)]
+        rendered.append(render_game_frame(theme, actors, width, height, food))
+
+        before_food = set(food)
         growth = advance_actor(
             user,
             "snake",
@@ -337,9 +431,12 @@ def build_frames(user: str, options: dict[str, Any], calendar: dict | None, them
             growth,
             set(worm_body),
         )
+        for consumed in before_food - set(food):
+            field_food.pop(consumed, None)
 
         if worm_enabled:
             for substep in range(worm_speed):
+                before_food = set(food)
                 worm_growth = advance_actor(
                     user,
                     "worm",
@@ -354,9 +451,8 @@ def build_frames(user: str, options: dict[str, Any], calendar: dict | None, them
                     worm_growth,
                     set(body),
                 )
-
-        actors = [(worm_colors, worm_body), (snake_colors, body)] if worm_enabled else [(snake_colors, body)]
-        rendered.append(render_game_frame(theme, actors, width, height, food))
+                for consumed in before_food - set(food):
+                    field_food.pop(consumed, None)
 
     return rendered
 
@@ -368,6 +464,7 @@ def render(user: str, config: dict[str, Any], calendar: dict | None, out_dir: Pa
     options.setdefault("duration", "40s")
     options.setdefault("frames", 120)
     options.setdefault("holdFrames", 12)
+    options.setdefault("transitionFrames", 14)
     options.setdefault("length", 6)
     options.setdefault("maxLength", 7)
     options.setdefault("growPerFood", 0)

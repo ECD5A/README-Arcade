@@ -26,6 +26,7 @@
     "frames": 120,
     "duration": "40s",
     "holdFrames": 12,
+    "transitionFrames": 14,
     "length": 6,
     "maxLength": 7,
     "growPerFood": 0,
@@ -41,7 +42,15 @@
     "frames": 120,
     "duration": "36s",
     "holdFrames": 12,
+    "transitionFrames": 10,
     "titleLeft": "MATRIX",
+    "titleRight": ""
+  },
+  "defrag": {
+    "frames": 120,
+    "duration": "42s",
+    "holdFrames": 12,
+    "titleLeft": "DEFRAG",
     "titleRight": ""
   }
 }

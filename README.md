@@ -12,7 +12,7 @@
   <img src="https://img.shields.io/badge/license-MIT-2da44e?style=flat-square" alt="MIT license">
   <img src="https://img.shields.io/badge/python-3.10%2B-3776ab?style=flat-square&logo=python&logoColor=white" alt="Python 3.10+">
   <img src="https://img.shields.io/badge/dependencies-zero-6f7787?style=flat-square" alt="Zero dependencies">
-  <img src="https://img.shields.io/badge/modes-3-39d353?style=flat-square" alt="Three modes">
+  <img src="https://img.shields.io/badge/modes-4-39d353?style=flat-square" alt="Four modes">
   <img src="https://img.shields.io/badge/theme-auto-58a6ff?style=flat-square" alt="Auto theme">
 </p>
 
@@ -33,8 +33,9 @@ It is built around GitHub contribution-style grids: small cells, dark/light them
 Available modes:
 
 - `lifegrid`: Conway Game of Life, started from your GitHub login.
-- `snake`: a short pink-headed snake and a faster worm start after the login intro, eat the darkest cells first, and keep moving without taking over the grid.
-- `matrix`: vertical code rain with login intro and GitHub-style intensity trails.
+- `snake`: a short pink-headed snake and a faster worm emerge from your login cells, eat the darkest squares first, and keep moving without taking over the grid.
+- `matrix`: vertical code rain that wipes down over the login intro with GitHub-style intensity trails.
+- `defrag`: a Windows 98-style disk map that starts fragmented and gradually compacts GitHub-colored blocks.
 
 ## Gallery
 
@@ -65,6 +66,16 @@ Available modes:
     <source media="(prefers-color-scheme: dark)" srcset="./dist/gallery/matrix-dark.svg">
     <source media="(prefers-color-scheme: light)" srcset="./dist/gallery/matrix.svg">
     <img src="./dist/gallery/matrix.svg" width="920" alt="README Arcade matrix mode">
+  </picture>
+</p>
+
+### Defrag
+
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="./dist/gallery/defrag-dark.svg">
+    <source media="(prefers-color-scheme: light)" srcset="./dist/gallery/defrag.svg">
+    <img src="./dist/gallery/defrag.svg" width="920" alt="README Arcade defrag mode">
   </picture>
 </p>
 
@@ -107,6 +118,8 @@ Put this in your profile README:
 
 `holdFrames` controls how long the initial login mark stays visible before the selected mode starts moving.
 
+`transitionFrames` controls how many frames are used to blend the login mark into modes that support a softer start.
+
 For `snake`, `length` sets the main body length, `maxLength` caps growth, and `growPerFood` controls how much the snake grows after eating a cell. Keep `growPerFood` at `0` for a clean runner that eats cells without getting long. The optional fast worm uses `worm`, `wormLength`, `wormSpeed`, and `wormGrowPerFood`.
 
 ```json
@@ -136,6 +149,10 @@ python scripts/render.py --mode snake --base-name readme-arcade --out-dir dist
 
 ```bash
 python scripts/render.py --mode matrix --base-name readme-arcade --out-dir dist
+```
+
+```bash
+python scripts/render.py --mode defrag --base-name readme-arcade --out-dir dist
 ```
 
 ## GitHub Actions
