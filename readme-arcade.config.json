@@ -26,9 +26,9 @@
     "frames": 120,
     "duration": "44s",
     "holdFrames": 12,
-    "length": 10,
-    "maxLength": 28,
-    "growPerFood": 2,
+    "length": 8,
+    "maxLength": 9,
+    "growPerFood": 0,
     "titleLeft": "SNAKE TRACE",
     "titleRight": "PINK HEAD // DARKEST FIRST"
   },

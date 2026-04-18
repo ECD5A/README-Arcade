@@ -18,16 +18,16 @@ Position = tuple[int, int]
 
 SNAKE_COLORS = {
     "dark": {
-        "head": "#ff5c8a",
+        "head": "#ff4d8d",
         "jaw": "#facc15",
-        "body": "#5eead4",
-        "tail": "#2dd4bf",
+        "body": "#58a6ff",
+        "tail": "#1f6feb",
     },
     "light": {
         "head": "#d6336c",
         "jaw": "#ca8a04",
-        "body": "#0f766e",
-        "tail": "#14b8a6",
+        "body": "#0969da",
+        "tail": "#54aeff",
     },
 }
 
@@ -235,9 +235,9 @@ def build_frames(user: str, options: dict[str, Any], calendar: dict | None, them
     height = box["height"]
     frames = int(options.get("frames", 120))
     intro_frames = min(max(1, int(options.get("holdFrames", 12))), frames - 1)
-    start_length = min(max(4, int(options.get("length", 10))), max(4, width - 4))
-    max_length = int(options.get("maxLength", 28))
-    grow_per_food = int(options.get("growPerFood", 2))
+    start_length = min(max(4, int(options.get("length", 8))), max(4, width - 4))
+    max_length = max(start_length, int(options.get("maxLength", 9)))
+    grow_per_food = max(0, int(options.get("growPerFood", 0)))
 
     body = initial_body(width, height, start_length)
     food = build_food(user, width, height, calendar, set(body))
@@ -273,8 +273,9 @@ def render(user: str, config: dict[str, Any], calendar: dict | None, out_dir: Pa
     options.setdefault("duration", "44s")
     options.setdefault("frames", 120)
     options.setdefault("holdFrames", 12)
-    options.setdefault("length", 10)
-    options.setdefault("maxLength", 28)
+    options.setdefault("length", 8)
+    options.setdefault("maxLength", 9)
+    options.setdefault("growPerFood", 0)
     options.setdefault("width", 53)
     options.setdefault("height", 7)
 
