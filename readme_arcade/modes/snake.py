@@ -277,15 +277,6 @@ def build_food(user: str, width: int, height: int, calendar: dict | None, blocke
     return food
 
 
-def reinforce_edge_food(user: str, food: dict[Position, int], width: int, height: int, blocked: set[Position]) -> None:
-    for y in (0, height - 1):
-        for x in range(width):
-            pos = (x, y)
-            if pos in blocked:
-                continue
-            food.setdefault(pos, 1 + (stable_byte(user, f"snake-edge-food:{x}:{y}") % 4))
-
-
 def reveal_field_food(
     user: str,
     food: dict[Position, int],
@@ -337,24 +328,14 @@ def edge_run_target(
     if len(row_food) < 3:
         return None
 
-    direction = 1 if actor == "snake" else -1
-    if head[1] == row:
-        next_pos = (head[0] + direction, row)
-        if next_pos in food:
-            return next_pos
-
     if actor == "snake":
-        forward = [pos for pos in row_food if pos[0] > head[0]]
+        forward = [pos for pos in row_food if pos[0] >= head[0]]
         candidates = forward or row_food
         return min(candidates, key=lambda pos: (abs(pos[0] - head[0]), pos[0]))
 
-    forward = [pos for pos in row_food if pos[0] < head[0]]
+    forward = [pos for pos in row_food if pos[0] <= head[0]]
     candidates = forward or row_food
     return min(candidates, key=lambda pos: (abs(pos[0] - head[0]), -pos[0]))
-
-
-def edge_run_active(frame: int, delay: int, run_frames: int) -> bool:
-    return run_frames > 0 and delay <= frame < delay + run_frames
 
 
 def choose_target(
@@ -644,7 +625,6 @@ def build_frames(user: str, options: dict[str, Any], calendar: dict | None, them
 
     blocked = set(body) | set(worm_body)
     field_food = build_food(user, width, height, calendar, blocked | set(letter_food))
-    reinforce_edge_food(user, field_food, width, height, blocked | set(letter_food))
     food = {pos: level for pos, level in letter_food.items() if pos not in blocked}
 
     rendered: list[list[list[str]]] = [name_grid(user, width, height, theme) for _ in range(intro_frames)]
@@ -694,9 +674,7 @@ def build_frames(user: str, options: dict[str, Any], calendar: dict | None, them
             field_food.pop(consumed, None)
 
         if worm_enabled:
-            active_edge_run = edge_run_active(frame, edge_run_delay, edge_run_frames)
-            current_worm_speed = 1 if active_edge_run else worm_speed
-            for substep in range(current_worm_speed):
+            for substep in range(worm_speed):
                 before_food = set(food)
                 worm_growth, worm_direction, worm_run = advance_actor(
                     user,
