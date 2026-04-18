@@ -512,7 +512,6 @@ def render_game_frame(
     width: int,
     height: int,
     food: dict[Position, int],
-    overlays: list[tuple[dict[str, str], list[Position]]] | None = None,
 ) -> list[list[str]]:
     grid = base_grid(theme, width, height)
 
@@ -521,34 +520,8 @@ def render_game_frame(
 
     for colors, body in actors:
         paint_actor(grid, colors, body)
-    for colors, body in overlays or []:
-        paint_actor(grid, colors, body)
 
     return grid
-
-
-def edge_sweep_actors(
-    snake_colors: dict[str, str],
-    worm_colors: dict[str, str],
-    width: int,
-    height: int,
-    frame: int,
-    total_frames: int,
-) -> list[tuple[dict[str, str], list[Position]]]:
-    if total_frames <= 0 or frame >= total_frames:
-        return []
-
-    length = min(8, max(4, width // 8))
-    top_head = min(width - 1, (frame * (width + length)) // max(1, total_frames - 1))
-    bottom_head = max(0, width - 1 - ((frame * (width + length)) // max(1, total_frames - 1)))
-    top = [(x, 0) for x in range(top_head, top_head - length, -1) if 0 <= x < width]
-    bottom = [(x, height - 1) for x in range(bottom_head, bottom_head + length) if 0 <= x < width]
-    actors: list[tuple[dict[str, str], list[Position]]] = []
-    if top:
-        actors.append((snake_colors, top))
-    if bottom:
-        actors.append((worm_colors, bottom))
-    return actors
 
 
 def render_birth_frame(
@@ -592,7 +565,6 @@ def build_frames(user: str, options: dict[str, Any], calendar: dict | None, them
     intro_frames = min(max(1, int(options.get("holdFrames", 12))), frames - 1)
     birth_frames = min(max(0, int(options.get("birthFrames", options.get("transitionFrames", 14)))), frames - intro_frames - 1)
     field_reveal_frames = max(1, int(options.get("fieldRevealFrames", 14)))
-    edge_sweep_frames = max(0, int(options.get("edgeSweepFrames", 18)))
     start_length = min(max(4, int(options.get("length", 6))), max(4, width - 4))
     max_length = max(start_length, int(options.get("maxLength", 7)))
     grow_per_food = max(0, int(options.get("growPerFood", 0)))
@@ -633,8 +605,7 @@ def build_frames(user: str, options: dict[str, Any], calendar: dict | None, them
         reveal_field_food(user, food, field_food, reveal_step, field_reveal_frames, set(body) | set(worm_body))
 
         actors = [(worm_colors, worm_body), (snake_colors, body)] if worm_enabled else [(snake_colors, body)]
-        overlays = edge_sweep_actors(snake_colors, worm_colors, width, height, frame, edge_sweep_frames)
-        rendered.append(render_game_frame(theme, actors, width, height, food, overlays))
+        rendered.append(render_game_frame(theme, actors, width, height, food))
 
         before_food = set(food)
         growth, snake_direction, snake_run = advance_actor(
@@ -691,7 +662,6 @@ def render(user: str, config: dict[str, Any], calendar: dict | None, out_dir: Pa
     options.setdefault("transitionFrames", 14)
     options.setdefault("birthFrames", 14)
     options.setdefault("fieldRevealFrames", 14)
-    options.setdefault("edgeSweepFrames", 18)
     options.setdefault("length", 6)
     options.setdefault("maxLength", 7)
     options.setdefault("growPerFood", 0)
