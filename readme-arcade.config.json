@@ -37,10 +37,12 @@
     "titleLeft": "SNAKE",
     "titleRight": ""
   },
-  "pacman": {
-    "frames": 96,
-    "duration": "34s",
-    "titleLeft": "PACMAN TRACE",
-    "titleRight": "DOT EATER"
+  "invaders": {
+    "frames": 120,
+    "duration": "40s",
+    "holdFrames": 12,
+    "shotPeriod": 7,
+    "titleLeft": "INVADERS",
+    "titleRight": ""
   }
 }

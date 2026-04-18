@@ -34,7 +34,7 @@ Available modes:
 
 - `lifegrid`: Conway Game of Life, started from your GitHub login.
 - `snake`: a short pink-headed snake and a faster worm start after the login intro, eat the darkest cells first, and keep moving without taking over the grid.
-- `pacman`: a dot eater moving through a contribution-style field.
+- `invaders`: a tiny old-school shooter with aliens, ship fire, hit flashes, and the same login intro.
 
 ## Gallery
 
@@ -58,13 +58,13 @@ Available modes:
   </picture>
 </p>
 
-### Pacman
+### Invaders
 
 <p align="center">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="./dist/gallery/pacman-dark.svg">
-    <source media="(prefers-color-scheme: light)" srcset="./dist/gallery/pacman.svg">
-    <img src="./dist/gallery/pacman.svg" width="920" alt="README Arcade pacman mode">
+    <source media="(prefers-color-scheme: dark)" srcset="./dist/gallery/invaders-dark.svg">
+    <source media="(prefers-color-scheme: light)" srcset="./dist/gallery/invaders.svg">
+    <img src="./dist/gallery/invaders.svg" width="920" alt="README Arcade invaders mode">
   </picture>
 </p>
 
@@ -135,7 +135,7 @@ python scripts/render.py --mode snake --base-name readme-arcade --out-dir dist
 ```
 
 ```bash
-python scripts/render.py --mode pacman --base-name readme-arcade --out-dir dist
+python scripts/render.py --mode invaders --base-name readme-arcade --out-dir dist
 ```
 
 Timing presets:
@@ -165,7 +165,7 @@ Possible future modes:
 - `matrix`
 - `hashwave`
 - `boot`
-- `space-invaders`
+- `arkanoid`
 
 ## Donate
 

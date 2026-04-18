@@ -1,0 +1,12 @@
+{
+  "user": "YOUR_LOGIN",
+  "mode": "invaders",
+  "invaders": {
+    "duration": "40s",
+    "frames": 120,
+    "holdFrames": 12,
+    "shotPeriod": 7,
+    "titleLeft": "INVADERS",
+    "titleRight": ""
+  }
+}
