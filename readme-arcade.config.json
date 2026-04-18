@@ -1,0 +1,25 @@
+{
+  "user": "ECD5A",
+  "mode": "lifegrid",
+  "output": {
+    "baseName": "readme-arcade"
+  },
+  "lifegrid": {
+    "width": 53,
+    "height": 7,
+    "frames": 96,
+    "duration": "42s",
+    "holdFrames": 4,
+    "density": "balanced",
+    "activityStream": true,
+    "streamEvery": 2,
+    "titleLeft": "CONWAY LIFEGRID",
+    "titleRight": "B3/S23",
+    "cellSize": 13,
+    "gap": 4,
+    "radius": 2,
+    "canvasWidth": 960,
+    "canvasHeight": 190,
+    "gridTop": 56
+  }
+}
