@@ -12,13 +12,15 @@ sys.path.insert(0, str(ROOT))
 
 from readme_arcade.config import load_config
 from readme_arcade.github import fetch_calendar
-from readme_arcade.modes import invaders, lifegrid, snake
+from readme_arcade.modes import boot, hashwave, lifegrid, matrix, snake
 
 
 GALLERY_MODES = {
     "lifegrid": lifegrid.render,
     "snake": snake.render,
-    "invaders": invaders.render,
+    "matrix": matrix.render,
+    "hashwave": hashwave.render,
+    "boot": boot.render,
 }
 
 

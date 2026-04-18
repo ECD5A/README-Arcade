@@ -12,7 +12,7 @@
   <img src="https://img.shields.io/badge/license-MIT-2da44e?style=flat-square" alt="MIT license">
   <img src="https://img.shields.io/badge/python-3.10%2B-3776ab?style=flat-square&logo=python&logoColor=white" alt="Python 3.10+">
   <img src="https://img.shields.io/badge/dependencies-zero-6f7787?style=flat-square" alt="Zero dependencies">
-  <img src="https://img.shields.io/badge/modes-3-39d353?style=flat-square" alt="Three modes">
+  <img src="https://img.shields.io/badge/modes-5-39d353?style=flat-square" alt="Five modes">
   <img src="https://img.shields.io/badge/theme-auto-58a6ff?style=flat-square" alt="Auto theme">
 </p>
 
@@ -34,7 +34,9 @@ Available modes:
 
 - `lifegrid`: Conway Game of Life, started from your GitHub login.
 - `snake`: a short pink-headed snake and a faster worm start after the login intro, eat the darkest cells first, and keep moving without taking over the grid.
-- `invaders`: a tiny old-school shooter with aliens, ship fire, hit flashes, and the same login intro.
+- `matrix`: vertical code rain with login intro and GitHub-style intensity trails.
+- `hashwave`: a dense crypto-native wave of hashed contribution cells and scan pulses.
+- `boot`: an old-machine boot sweep with memory-map fill, cursor ticks, and login intro.
 
 ## Gallery
 
@@ -58,13 +60,33 @@ Available modes:
   </picture>
 </p>
 
-### Invaders
+### Matrix
 
 <p align="center">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="./dist/gallery/invaders-dark.svg">
-    <source media="(prefers-color-scheme: light)" srcset="./dist/gallery/invaders.svg">
-    <img src="./dist/gallery/invaders.svg" width="920" alt="README Arcade invaders mode">
+    <source media="(prefers-color-scheme: dark)" srcset="./dist/gallery/matrix-dark.svg">
+    <source media="(prefers-color-scheme: light)" srcset="./dist/gallery/matrix.svg">
+    <img src="./dist/gallery/matrix.svg" width="920" alt="README Arcade matrix mode">
+  </picture>
+</p>
+
+### Hashwave
+
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="./dist/gallery/hashwave-dark.svg">
+    <source media="(prefers-color-scheme: light)" srcset="./dist/gallery/hashwave.svg">
+    <img src="./dist/gallery/hashwave.svg" width="920" alt="README Arcade hashwave mode">
+  </picture>
+</p>
+
+### Boot
+
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="./dist/gallery/boot-dark.svg">
+    <source media="(prefers-color-scheme: light)" srcset="./dist/gallery/boot.svg">
+    <img src="./dist/gallery/boot.svg" width="920" alt="README Arcade boot mode">
   </picture>
 </p>
 
@@ -135,17 +157,15 @@ python scripts/render.py --mode snake --base-name readme-arcade --out-dir dist
 ```
 
 ```bash
-python scripts/render.py --mode invaders --base-name readme-arcade --out-dir dist
+python scripts/render.py --mode matrix --base-name readme-arcade --out-dir dist
 ```
 
-Timing presets:
-
-```json
-{ "frames": 72, "duration": "30s", "holdFrames": 3 }
+```bash
+python scripts/render.py --mode hashwave --base-name readme-arcade --out-dir dist
 ```
 
-```json
-{ "frames": 120, "duration": "60s", "holdFrames": 5 }
+```bash
+python scripts/render.py --mode boot --base-name readme-arcade --out-dir dist
 ```
 
 ## GitHub Actions
@@ -157,15 +177,6 @@ The included workflow renders the SVG:
 - manually from the Actions tab
 
 Daily rendering lets the block pick up fresh GitHub contribution data when `GITHUB_TOKEN` is available.
-
-## Roadmap
-
-Possible future modes:
-
-- `matrix`
-- `hashwave`
-- `boot`
-- `arkanoid`
 
 ## Donate
 
