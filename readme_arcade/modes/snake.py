@@ -303,45 +303,15 @@ def reveal_threshold(frame: int, reveal_frames: int) -> int:
     return min(255, int(((frame + 1) / reveal_frames) * 255))
 
 
-def actor_territory_score(pos: Position, width: int, actor: str) -> int:
-    x, _y = pos
-    middle = width // 2
-    buffer = 2
-    if actor == "worm":
-        if x > middle + buffer:
-            return 0
-        if x >= middle - buffer:
-            return 1
-        return 4
-
-    if x < middle - buffer:
-        return 0
-    if x <= middle + buffer:
-        return 1
-    return 4
-
-
 def actor_lane_priority(pos: Position, width: int, height: int, actor: str) -> tuple[int, int]:
-    _x, y = pos
+    x, y = pos
     if actor == "worm":
-        zone = actor_territory_score(pos, width, actor)
+        zone = 0 if x >= width // 2 else 1
         lane = abs(y - max(0, height // 3))
     else:
-        zone = actor_territory_score(pos, width, actor)
+        zone = 0 if x < width // 2 else 1
         lane = abs(y - min(height - 1, (height * 2) // 3))
     return zone, lane
-
-
-def actor_food_pool(food: dict[Position, int], width: int, actor: str) -> list[Position]:
-    owned = [pos for pos in food if actor_territory_score(pos, width, actor) == 0]
-    if owned:
-        return owned
-
-    neutral = [pos for pos in food if actor_territory_score(pos, width, actor) == 1]
-    if neutral:
-        return neutral
-
-    return list(food)
 
 
 def edge_run_target(
@@ -358,14 +328,14 @@ def edge_run_target(
         return None
 
     row = 0 if actor == "snake" else height - 1
-    row_food = [pos for pos in actor_food_pool(food, width, actor) if pos[1] == row]
+    row_food = [pos for pos in food if pos[1] == row]
     if len(row_food) < 3:
         return None
 
     direction = 1 if actor == "snake" else -1
     if head[1] == row:
         next_pos = (head[0] + direction, row)
-        if next_pos in row_food:
+        if next_pos in food:
             return next_pos
 
     if actor == "snake":
@@ -404,7 +374,7 @@ def feed_next_edge_cell(
 
     direction = 1 if actor == "snake" else -1
     pos = (head[0] + direction, row)
-    if 0 <= pos[0] < width and pos not in blocked and actor_territory_score(pos, width, actor) == 0:
+    if 0 <= pos[0] < width and pos not in blocked:
         food.setdefault(pos, 1 + (stable_byte(user, f"{actor}:edge-step-food:{pos[0]}:{pos[1]}") % 4))
 
 
@@ -427,8 +397,7 @@ def choose_target(
     if target:
         return target
 
-    pool = actor_food_pool(food, width, actor)
-    nearby = [pos for pos in pool if manhattan(head, pos) <= 3]
+    nearby = [pos for pos in food if manhattan(head, pos) <= 3]
     if nearby:
         return min(
             nearby,
@@ -441,7 +410,7 @@ def choose_target(
         )
 
     return min(
-        pool,
+        food,
         key=lambda pos: (
             darkness_priority(food[pos], theme_name),
             *actor_lane_priority(pos, width, height, actor),
@@ -500,14 +469,7 @@ def choose_step(
         if pos in body_block:
             continue
 
-        territory_score = actor_territory_score(pos, width, actor)
-        eating_priority = 0
-        if pos not in food:
-            eating_priority = 2
-        elif territory_score == 1:
-            eating_priority = 1
-        elif territory_score > 1:
-            eating_priority = 3
+        eating_priority = 0 if pos in food else 1
         eating_level = darkness_priority(food[pos], theme_name) if pos in food else 9
         next_distance = manhattan(pos, target)
         if next_distance < current_distance:
@@ -534,7 +496,6 @@ def choose_step(
         candidates.append(
             (
                 (
-                    territory_score,
                     eating_priority,
                     eating_level,
                     progress_penalty,
