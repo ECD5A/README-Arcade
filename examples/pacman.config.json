@@ -1,0 +1,10 @@
+{
+  "user": "YOUR_LOGIN",
+  "mode": "pacman",
+  "pacman": {
+    "duration": "34s",
+    "frames": 96,
+    "titleLeft": "PACMAN TRACE",
+    "titleRight": "DOT EATER"
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "user": "YOUR_LOGIN",
+  "mode": "snake",
+  "snake": {
+    "duration": "36s",
+    "frames": 96,
+    "length": 18,
+    "titleLeft": "SNAKE TRACE",
+    "titleRight": "README ARCADE"
+  }
+}

@@ -21,5 +21,19 @@
     "canvasWidth": 960,
     "canvasHeight": 190,
     "gridTop": 56
+  },
+  "snake": {
+    "frames": 96,
+    "duration": "36s",
+    "holdFrames": 2,
+    "length": 18,
+    "titleLeft": "SNAKE TRACE",
+    "titleRight": "README ARCADE"
+  },
+  "pacman": {
+    "frames": 96,
+    "duration": "34s",
+    "titleLeft": "PACMAN TRACE",
+    "titleRight": "DOT EATER"
   }
 }

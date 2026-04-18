@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>README Arcade Preview</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      font-family: ui-monospace, SFMono-Regular, Consolas, Liberation Mono, monospace;
+      background: #f6f8fa;
+      color: #24292f;
+    }
+
+    body {
+      margin: 0;
+      padding: 32px 18px 56px;
+    }
+
+    main {
+      max-width: 1040px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      margin: 0 0 6px;
+      font-size: 28px;
+      letter-spacing: 0;
+    }
+
+    p {
+      margin: 0 0 24px;
+      color: #57606a;
+    }
+
+    section {
+      margin: 26px 0;
+    }
+
+    h2 {
+      margin: 0 0 10px;
+      font-size: 15px;
+      font-weight: 700;
+      color: #57606a;
+      letter-spacing: 0;
+      text-transform: uppercase;
+    }
+
+    img {
+      display: block;
+      width: 100%;
+      max-width: 960px;
+      height: auto;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        background: #0d1117;
+        color: #f0f6fc;
+      }
+
+      p,
+      h2 {
+        color: #8b949e;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>README Arcade</h1>
+    <p>Local preview for generated modes.</p>
+
+    <section>
+      <h2>Default</h2>
+      <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="../dist/readme-arcade-dark.svg">
+        <source media="(prefers-color-scheme: light)" srcset="../dist/readme-arcade.svg">
+        <img src="../dist/readme-arcade.svg" alt="README Arcade default mode">
+      </picture>
+    </section>
+
+    <section>
+      <h2>Lifegrid</h2>
+      <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="../dist/gallery/lifegrid-dark.svg">
+        <source media="(prefers-color-scheme: light)" srcset="../dist/gallery/lifegrid.svg">
+        <img src="../dist/gallery/lifegrid.svg" alt="README Arcade lifegrid mode">
+      </picture>
+    </section>
+
+    <section>
+      <h2>Snake</h2>
+      <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="../dist/gallery/snake-dark.svg">
+        <source media="(prefers-color-scheme: light)" srcset="../dist/gallery/snake.svg">
+        <img src="../dist/gallery/snake.svg" alt="README Arcade snake mode">
+      </picture>
+    </section>
+
+    <section>
+      <h2>Pacman</h2>
+      <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="../dist/gallery/pacman-dark.svg">
+        <source media="(prefers-color-scheme: light)" srcset="../dist/gallery/pacman.svg">
+        <img src="../dist/gallery/pacman.svg" alt="README Arcade pacman mode">
+      </picture>
+    </section>
+  </main>
+</body>
+</html>

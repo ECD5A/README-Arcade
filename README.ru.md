@@ -1,11 +1,11 @@
 <h1 align="center">README Arcade</h1>
 
 <p align="center">
-  Animated arcade blocks for GitHub profile READMEs.
+  Анимированные arcade-блоки для GitHub profile README.
 </p>
 
 <p align="center">
-  <a href="./README.ru.md">Russian mirror</a>
+  <a href="./README.md">English README</a>
 </p>
 
 <p align="center">
@@ -24,19 +24,19 @@
   </picture>
 </p>
 
-## What It Does
+## Что Это
 
-README Arcade generates animated SVG blocks for GitHub profile READMEs.
+README Arcade генерирует анимированные SVG-блоки для GitHub profile README.
 
-It is built around GitHub contribution-style grids: small cells, dark/light theme assets, deterministic motion, and optional contribution data from the GitHub API. The SVG repeats forever, so it keeps moving inside a README without JavaScript.
+Идея простая: маленькая arcade-анимация в стиле GitHub contribution grid. Блок умеет dark/light тему, не требует JavaScript, повторяется бесконечно и может брать contribution-данные через GitHub API.
 
-Available modes:
+Доступные режимы:
 
-- `lifegrid`: Conway Game of Life, started from your GitHub login.
-- `snake`: a snake trace moving through the grid.
-- `pacman`: a dot eater moving through a contribution-style field.
+- `lifegrid`: Conway Game of Life, стартует из твоего GitHub-ника.
+- `snake`: змейка, которая движется по сетке.
+- `pacman`: dot eater в стиле contribution-grid.
 
-## Gallery
+## Галерея
 
 ### Lifegrid
 
@@ -68,9 +68,9 @@ Available modes:
   </picture>
 </p>
 
-## Quick Start
+## Быстрый Старт
 
-Clone or fork this repository, then edit `readme-arcade.config.json`:
+Склонируй или форкни репозиторий, потом измени `readme-arcade.config.json`:
 
 ```json
 {
@@ -79,13 +79,13 @@ Clone or fork this repository, then edit `readme-arcade.config.json`:
 }
 ```
 
-Render the SVG files:
+Сгенерируй SVG:
 
 ```bash
 python scripts/render.py --config readme-arcade.config.json --out-dir dist
 ```
 
-Put this in your profile README:
+Вставь в свой profile README:
 
 ```html
 <p align="center">
@@ -97,15 +97,15 @@ Put this in your profile README:
 </p>
 ```
 
-## Config
+## Конфиг
 
-`mode` selects the animation.
+`mode` выбирает анимацию.
 
-`duration` controls how long one full animation loop takes. The SVG repeats forever.
+`duration` задает длительность одного полного цикла. SVG повторяется бесконечно.
 
-`frames` controls how many precomputed states are embedded into that loop. More frames make the loop feel longer and less repetitive.
+`frames` задает количество заранее рассчитанных кадров внутри цикла. Чем больше кадров, тем длиннее и менее повторяющейся ощущается анимация.
 
-`holdFrames` controls how long the initial login mark stays visible before `lifegrid` starts evolving.
+`holdFrames` задает паузу на первом кадре, чтобы ник успели увидеть до старта `lifegrid`.
 
 ```json
 {
@@ -126,7 +126,7 @@ Put this in your profile README:
 }
 ```
 
-Render another mode:
+Другой режим:
 
 ```bash
 python scripts/render.py --mode snake --base-name readme-arcade --out-dir dist
@@ -136,7 +136,7 @@ python scripts/render.py --mode snake --base-name readme-arcade --out-dir dist
 python scripts/render.py --mode pacman --base-name readme-arcade --out-dir dist
 ```
 
-Timing presets:
+Пресеты времени:
 
 ```json
 { "frames": 72, "duration": "30s", "holdFrames": 3 }
@@ -148,23 +148,23 @@ Timing presets:
 
 ## GitHub Actions
 
-The included workflow renders the SVG:
+Workflow уже есть. Он генерирует SVG:
 
-- on push
-- once per day
-- manually from the Actions tab
+- при push
+- раз в день
+- вручную через вкладку Actions
 
-Daily rendering lets the block pick up fresh GitHub contribution data when `GITHUB_TOKEN` is available.
+Ежедневная генерация нужна, чтобы блок мог подхватывать свежие GitHub contribution-данные.
 
 ## Roadmap
 
-Possible future modes:
+Идеи для следующих режимов:
 
 - `matrix`
 - `hashwave`
 - `boot`
 - `space-invaders`
 
-## License
+## Лицензия
 
 MIT

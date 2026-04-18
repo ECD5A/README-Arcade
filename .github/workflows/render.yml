@@ -38,7 +38,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           README_ARCADE_USER: ${{ github.event.inputs.user }}
-        run: python scripts/render.py --config readme-arcade.config.json --out-dir dist
+        run: |
+          python scripts/render.py --config readme-arcade.config.json --out-dir dist
+          python scripts/render_gallery.py
 
       - name: Commit generated SVG
         run: |
@@ -49,6 +51,6 @@ jobs:
 
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add dist/readme-arcade.svg dist/readme-arcade-dark.svg
+          git add dist
           git commit -m "Update README Arcade SVG"
           git push
