@@ -165,6 +165,22 @@ Possible future modes:
 - `boot`
 - `space-invaders`
 
+## Donate
+
+If README Arcade is useful for your profile or project, you can support the author:
+
+```text
+TON: pointoncurve.ton
+BTC: 1ECDSA1b4d5TcZHtqNpcxmY8pBH1GgHntN
+USDT (TRC20): TSWcFVfqCp4WCXrUkkzdCkcLnhtFLNN3Ba
+```
+
+Donations are optional. Always verify the address and network before sending crypto.
+
+## Disclaimer
+
+README Arcade is provided as-is under the MIT License. Generated SVGs are decorative README assets; use them at your own risk. The project does not provide financial, security, or investment advice.
+
 ## License
 
 MIT

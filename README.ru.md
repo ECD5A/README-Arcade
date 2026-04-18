@@ -165,6 +165,22 @@ Workflow уже есть. Он генерирует SVG:
 - `boot`
 - `space-invaders`
 
+## Donate
+
+Если README Arcade пригодился для твоего профиля или проекта, можно поддержать автора:
+
+```text
+TON: pointoncurve.ton
+BTC: 1ECDSA1b4d5TcZHtqNpcxmY8pBH1GgHntN
+USDT (TRC20): TSWcFVfqCp4WCXrUkkzdCkcLnhtFLNN3Ba
+```
+
+Донаты добровольные. Перед отправкой всегда проверяй адрес и сеть.
+
+## Disclaimer
+
+README Arcade предоставляется как есть по лицензии MIT. Сгенерированные SVG являются декоративными README-ассетами; используй их на свой риск. Проект не является финансовой, инвестиционной или security-рекомендацией.
+
 ## Лицензия
 
 MIT
