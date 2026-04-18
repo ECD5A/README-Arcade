@@ -103,6 +103,11 @@ def name_grid(user: str, width: int, height: int, theme: dict[str, str]) -> list
     return grid
 
 
+def neighbor_positions(pos: Position) -> list[Position]:
+    x, y = pos
+    return [(x + 1, y), (x, y + 1), (x, y - 1), (x - 1, y)]
+
+
 def body_from_head(
     head: Position,
     length: int,
@@ -129,6 +134,57 @@ def body_from_head(
             return body
 
     return initial_body(width, height, length, hy, hx)
+
+
+def body_from_name_cells(
+    user: str,
+    cells: dict[Position, int],
+    actor: str,
+    length: int,
+    width: int,
+    height: int,
+    used: set[Position] | None = None,
+) -> list[Position]:
+    blocked = used or set()
+    cell_set = set(cells)
+    target_x = width // 3 if actor == "snake" else (width * 2) // 3
+    target_y = min(height - 1, (height // 2) + 1) if actor == "snake" else max(0, (height // 2) - 2)
+    candidates = [pos for pos in cell_set if pos not in blocked]
+    candidates.sort(
+        key=lambda pos: (
+            manhattan(pos, (target_x, target_y)),
+            stable_byte(user, f"{actor}:name-path-head:{pos[0]}:{pos[1]}"),
+        )
+    )
+
+    def ordered_neighbors(pos: Position, path: list[Position]) -> list[Position]:
+        options = [neighbor for neighbor in neighbor_positions(pos) if neighbor in cell_set and neighbor not in blocked and neighbor not in path]
+        return sorted(
+            options,
+            key=lambda neighbor: (
+                0 if (actor == "snake" and neighbor[0] <= pos[0]) or (actor == "worm" and neighbor[0] >= pos[0]) else 1,
+                stable_byte(user, f"{actor}:name-path:{pos[0]}:{pos[1]}:{neighbor[0]}:{neighbor[1]}"),
+            ),
+        )
+
+    def walk(path: list[Position]) -> list[Position] | None:
+        if len(path) == length:
+            return path[:]
+        for neighbor in ordered_neighbors(path[-1], path):
+            path.append(neighbor)
+            result = walk(path)
+            if result:
+                return result
+            path.pop()
+        return None
+
+    for head in candidates:
+        result = walk([head])
+        if result:
+            return result
+
+    fallback = choose_name_head(user, list(cells), actor, width, height, blocked)
+    return body_from_head(fallback, length, width, height, blocked, facing=-1 if actor == "worm" else 1)
 
 
 def choose_name_head(
@@ -183,7 +239,7 @@ def build_food(user: str, width: int, height: int, calendar: dict | None, blocke
 
             count = counts[y][x]
             roll = stable_byte(user, f"snake-food:{x}:{y}")
-            if count <= 0 and roll > 116:
+            if count <= 0 and roll > 76:
                 continue
 
             if count >= 10:
@@ -209,7 +265,7 @@ def build_food(user: str, width: int, height: int, calendar: dict | None, blocke
     rng = stable_rng(user, "snake-dark-food")
     dark_cells = [pos for pos, level in food.items() if level == 1]
     attempts = 0
-    while len(dark_cells) < 26 and attempts < width * height * 2:
+    while len(dark_cells) < 18 and attempts < width * height * 2:
         attempts += 1
         pos = (rng.randrange(0, width), rng.randrange(0, height))
         if pos in blocked:
@@ -288,11 +344,14 @@ def choose_step(
     width: int,
     height: int,
     blocked: set[Position] | None = None,
+    last_direction: tuple[int, int] | None = None,
+    direction_run: int = 0,
 ) -> Position:
     if target is None:
         target = ((head[0] + 7) % width, (head[1] + 3) % height)
 
     current_dir = (head[0] - body[1][0], head[1] - body[1][1]) if len(body) > 1 else (1, 0)
+    straight_run = straight_run_length(body)
     directions = [(1, 0), (0, 1), (0, -1), (-1, 0)]
     body_block = set(body[:-1])
     if blocked:
@@ -322,14 +381,19 @@ def choose_step(
             continue
 
         next_distance = manhattan(pos, target)
-        progress_penalty = 0 if next_distance <= current_distance else 5
+        progress_penalty = 0 if next_distance <= current_distance else 2
         turn_penalty = 4 if (dx, dy) == current_dir else 0
         if not turn_window:
             turn_penalty = 0 if (dx, dy) == current_dir else 2
+        if straight_run >= 3 and (dx, dy) == current_dir:
+            turn_penalty += 14
+        if last_direction and direction_run >= 4 and (dx, dy) == last_direction:
+            progress_penalty += 8
+            turn_penalty += 18
         edge_penalty = 3 if nx in (0, width - 1) or ny in (0, height - 1) else 0
         weave_score = manhattan(pos, steering_target)
         wiggle = stable_byte(user, f"{actor}:move:{frame}:{nx}:{ny}") % 5
-        candidates.append(((progress_penalty, weave_score, next_distance // 2, turn_penalty, edge_penalty, wiggle), pos))
+        candidates.append(((progress_penalty, turn_penalty, weave_score, next_distance // 2, edge_penalty, wiggle), pos))
 
     if candidates:
         return min(candidates, key=lambda item: item[0])[1]
@@ -342,6 +406,20 @@ def choose_step(
             return (nx, ny)
 
     return head
+
+
+def straight_run_length(body: list[Position]) -> int:
+    if len(body) < 3:
+        return 1
+
+    direction = (body[0][0] - body[1][0], body[0][1] - body[1][1])
+    run = 1
+    for index in range(1, min(len(body) - 1, 5)):
+        step = (body[index - 1][0] - body[index][0], body[index - 1][1] - body[index][1])
+        if step != direction:
+            break
+        run += 1
+    return run
 
 
 def advance_actor(
@@ -357,9 +435,26 @@ def advance_actor(
     grow_per_food: int,
     growth: int,
     blocked: set[Position] | None = None,
-) -> int:
+    last_direction: tuple[int, int] | None = None,
+    direction_run: int = 0,
+) -> tuple[int, tuple[int, int], int]:
     target = choose_target(user, body[0], food, theme_name, actor, width, height)
-    next_head = choose_step(user, frame, actor, body[0], target, body, width, height, blocked)
+    previous_head = body[0]
+    next_head = choose_step(
+        user,
+        frame,
+        actor,
+        previous_head,
+        target,
+        body,
+        width,
+        height,
+        blocked,
+        last_direction,
+        direction_run,
+    )
+    next_direction = (next_head[0] - previous_head[0], next_head[1] - previous_head[1])
+    next_run = direction_run + 1 if last_direction == next_direction else 1
     body.insert(0, next_head)
 
     if next_head in food:
@@ -372,7 +467,7 @@ def advance_actor(
         body.pop()
 
     del body[max_length:]
-    return growth
+    return growth, next_direction, next_run
 
 
 def paint_actor(grid: list[list[str]], colors: dict[str, str], body: list[Position]) -> None:
@@ -387,6 +482,26 @@ def paint_actor(grid: list[list[str]], colors: dict[str, str], body: list[Positi
 
     hx, hy = body[0]
     grid[hy][hx] = colors["head"]
+
+
+def paint_actor_partial(grid: list[list[str]], colors: dict[str, str], body: list[Position], visible: int) -> None:
+    visible = min(max(0, visible), len(body))
+    if visible <= 0:
+        return
+
+    visible_cells = list(reversed(body))[:visible]
+    for offset, (x, y) in enumerate(visible_cells):
+        grid[y][x] = colors["tail"]
+        if offset > max(0, len(body) // 3):
+            grid[y][x] = colors["body"]
+
+    if len(body) > 1 and body[1] in visible_cells:
+        nx, ny = body[1]
+        grid[ny][nx] = colors["jaw"]
+
+    if body[0] in visible_cells:
+        hx, hy = body[0]
+        grid[hy][hx] = colors["head"]
 
 
 def render_game_frame(
@@ -407,6 +522,26 @@ def render_game_frame(
     return grid
 
 
+def render_birth_frame(
+    user: str,
+    theme: dict[str, str],
+    actors: list[tuple[dict[str, str], list[Position], float]],
+    width: int,
+    height: int,
+    frame: int,
+    total_frames: int,
+) -> list[list[str]]:
+    grid = name_grid(user, width, height, theme)
+    progress = (frame + 1) / max(1, total_frames)
+
+    for colors, body, delay in actors:
+        local_progress = max(0.0, min(1.0, (progress - delay) / max(0.01, 1.0 - delay)))
+        visible = int(round(local_progress * len(body)))
+        paint_actor_partial(grid, colors, body, visible)
+
+    return grid
+
+
 def build_frames(user: str, options: dict[str, Any], calendar: dict | None, theme_name: str) -> list[list[list[str]]]:
     theme = THEMES[theme_name]
     snake_colors = dict(SNAKE_COLORS[theme_name])
@@ -421,7 +556,8 @@ def build_frames(user: str, options: dict[str, Any], calendar: dict | None, them
     height = box["height"]
     frames = int(options.get("frames", 120))
     intro_frames = min(max(1, int(options.get("holdFrames", 12))), frames - 1)
-    transition_frames = min(max(0, int(options.get("transitionFrames", 14))), frames - intro_frames - 1)
+    birth_frames = min(max(0, int(options.get("birthFrames", options.get("transitionFrames", 14)))), frames - intro_frames - 1)
+    field_reveal_frames = max(1, int(options.get("fieldRevealFrames", 52)))
     start_length = min(max(4, int(options.get("length", 6))), max(4, width - 4))
     max_length = max(start_length, int(options.get("maxLength", 7)))
     grow_per_food = max(0, int(options.get("growPerFood", 0)))
@@ -432,30 +568,38 @@ def build_frames(user: str, options: dict[str, Any], calendar: dict | None, them
     worm_grow_per_food = max(0, int(options.get("wormGrowPerFood", 0)))
 
     letter_food = name_food(user, width, height)
-    letter_cells = list(letter_food)
-    body = body_from_head(choose_name_head(user, letter_cells, "snake", width, height), start_length, width, height)
+    body = body_from_name_cells(user, letter_food, "snake", start_length, width, height)
     worm_body: list[Position] = []
     if worm_enabled:
-        worm_head = choose_name_head(user, letter_cells, "worm", width, height, set(body))
-        worm_body = body_from_head(worm_head, worm_length, width, height, set(body), facing=-1)
+        worm_body = body_from_name_cells(user, letter_food, "worm", worm_length, width, height, set(body))
 
     blocked = set(body) | set(worm_body)
     field_food = build_food(user, width, height, calendar, blocked | set(letter_food))
     food = {pos: level for pos, level in letter_food.items() if pos not in blocked}
 
     rendered: list[list[list[str]]] = [name_grid(user, width, height, theme) for _ in range(intro_frames)]
+    birth_actors = [(snake_colors, body, 0.0)]
+    if worm_enabled:
+        birth_actors.insert(0, (worm_colors, worm_body, 0.18))
+    for frame in range(birth_frames):
+        rendered.append(render_birth_frame(user, theme, birth_actors, width, height, frame, birth_frames))
+
     growth = 0
     worm_growth = 0
+    snake_direction: tuple[int, int] | None = None
+    snake_run = 0
+    worm_direction: tuple[int, int] | None = None
+    worm_run = 0
 
-    for frame in range(frames - intro_frames):
-        reveal_step = min(frame, max(0, transition_frames - 1))
-        reveal_field_food(user, food, field_food, reveal_step, transition_frames, set(body) | set(worm_body))
+    for frame in range(frames - len(rendered)):
+        reveal_step = min(frame, field_reveal_frames - 1)
+        reveal_field_food(user, food, field_food, reveal_step, field_reveal_frames, set(body) | set(worm_body))
 
         actors = [(worm_colors, worm_body), (snake_colors, body)] if worm_enabled else [(snake_colors, body)]
         rendered.append(render_game_frame(theme, actors, width, height, food))
 
         before_food = set(food)
-        growth = advance_actor(
+        growth, snake_direction, snake_run = advance_actor(
             user,
             "snake",
             frame,
@@ -468,6 +612,8 @@ def build_frames(user: str, options: dict[str, Any], calendar: dict | None, them
             grow_per_food,
             growth,
             set(worm_body),
+            snake_direction,
+            snake_run,
         )
         for consumed in before_food - set(food):
             field_food.pop(consumed, None)
@@ -475,7 +621,7 @@ def build_frames(user: str, options: dict[str, Any], calendar: dict | None, them
         if worm_enabled:
             for substep in range(worm_speed):
                 before_food = set(food)
-                worm_growth = advance_actor(
+                worm_growth, worm_direction, worm_run = advance_actor(
                     user,
                     "worm",
                     (frame * worm_speed) + substep,
@@ -488,6 +634,8 @@ def build_frames(user: str, options: dict[str, Any], calendar: dict | None, them
                     worm_grow_per_food,
                     worm_growth,
                     set(body),
+                    worm_direction,
+                    worm_run,
                 )
                 for consumed in before_food - set(food):
                     field_food.pop(consumed, None)
@@ -503,6 +651,8 @@ def render(user: str, config: dict[str, Any], calendar: dict | None, out_dir: Pa
     options.setdefault("frames", 120)
     options.setdefault("holdFrames", 12)
     options.setdefault("transitionFrames", 14)
+    options.setdefault("birthFrames", 14)
+    options.setdefault("fieldRevealFrames", 52)
     options.setdefault("length", 6)
     options.setdefault("maxLength", 7)
     options.setdefault("growPerFood", 0)
