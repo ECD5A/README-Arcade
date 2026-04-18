@@ -69,6 +69,10 @@ def manhattan(a: Position, b: Position) -> int:
     return abs(a[0] - b[0]) + abs(a[1] - b[1])
 
 
+def darkness_priority(level: int, theme_name: str) -> int:
+    return level if theme_name == "dark" else 5 - level
+
+
 def name_food(user: str, width: int, height: int) -> dict[Position, int]:
     cells: dict[Position, int] = {}
     text = "".join(ch for ch in user.upper() if ch in FONT_5X7)[:8] or "README"
@@ -393,13 +397,22 @@ def choose_target(
     if target:
         return target
 
-    def darkness_priority(level: int) -> int:
-        return level if theme_name == "dark" else 5 - level
+    nearby = [pos for pos in food if manhattan(head, pos) <= 3]
+    if nearby:
+        return min(
+            nearby,
+            key=lambda pos: (
+                manhattan(head, pos),
+                darkness_priority(food[pos], theme_name),
+                *actor_lane_priority(pos, width, height, actor),
+                stable_byte(user, f"{actor}:near-target:{pos[0]}:{pos[1]}"),
+            ),
+        )
 
     return min(
         food,
         key=lambda pos: (
-            darkness_priority(food[pos]),
+            darkness_priority(food[pos], theme_name),
             *actor_lane_priority(pos, width, height, actor),
             manhattan(head, pos),
             stable_byte(user, f"{actor}:target:{pos[0]}:{pos[1]}"),
@@ -416,6 +429,8 @@ def choose_step(
     body: list[Position],
     width: int,
     height: int,
+    food: dict[Position, int],
+    theme_name: str,
     blocked: set[Position] | None = None,
     last_direction: tuple[int, int] | None = None,
     direction_run: int = 0,
@@ -429,7 +444,7 @@ def choose_step(
     body_block = set(body[:-1])
     if blocked:
         body_block.update(blocked)
-    candidates: list[tuple[tuple[int, int, int, int, int, int], Position]] = []
+    candidates: list[tuple[tuple[int, ...], Position]] = []
     current_distance = manhattan(head, target)
     phase_size = 5 if actor == "worm" else 6
     phase = frame // phase_size
@@ -454,6 +469,8 @@ def choose_step(
         if pos in body_block:
             continue
 
+        eating_priority = 0 if pos in food else 1
+        eating_level = darkness_priority(food[pos], theme_name) if pos in food else 9
         next_distance = manhattan(pos, target)
         if next_distance < current_distance:
             progress_penalty = 0
@@ -476,7 +493,21 @@ def choose_step(
         edge_penalty = 3 if nx in (0, width - 1) or ny in (0, height - 1) else 0
         weave_score = manhattan(pos, steering_target)
         wiggle = stable_byte(user, f"{actor}:move:{frame}:{nx}:{ny}") % 3
-        candidates.append(((progress_penalty, next_distance, turn_penalty, edge_penalty, weave_score // 2, wiggle), pos))
+        candidates.append(
+            (
+                (
+                    eating_priority,
+                    eating_level,
+                    progress_penalty,
+                    next_distance,
+                    turn_penalty,
+                    edge_penalty,
+                    weave_score // 2,
+                    wiggle,
+                ),
+                pos,
+            )
+        )
 
     if candidates:
         return min(candidates, key=lambda item: item[0])[1]
@@ -535,6 +566,8 @@ def advance_actor(
         body,
         width,
         height,
+        food,
+        theme_name,
         blocked,
         last_direction,
         direction_run,
@@ -744,8 +777,11 @@ def build_frames(user: str, options: dict[str, Any], calendar: dict | None, them
                     edge_run_delay,
                     edge_run_frames,
                 )
-                for consumed in before_food - set(food):
+                consumed_positions = before_food - set(food)
+                for consumed in consumed_positions:
                     field_food.pop(consumed, None)
+                if consumed_positions:
+                    break
 
     return rendered
 
