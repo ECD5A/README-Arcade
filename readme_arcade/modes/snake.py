@@ -790,7 +790,7 @@ def render(user: str, config: dict[str, Any], calendar: dict | None, out_dir: Pa
     options = dict(config.get("snake", {}))
     options.setdefault("titleLeft", "SNAKE")
     options.setdefault("titleRight", "")
-    options.setdefault("duration", "40s")
+    options.setdefault("duration", "32s")
     options.setdefault("frames", 120)
     options.setdefault("holdFrames", 12)
     options.setdefault("transitionFrames", 8)

@@ -2,7 +2,7 @@
   "user": "YOUR_LOGIN",
   "mode": "snake",
   "snake": {
-    "duration": "40s",
+    "duration": "32s",
     "frames": 120,
     "holdFrames": 12,
     "transitionFrames": 8,

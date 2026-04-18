@@ -24,7 +24,7 @@
   },
   "snake": {
     "frames": 120,
-    "duration": "40s",
+    "duration": "32s",
     "holdFrames": 12,
     "transitionFrames": 8,
     "birthFrames": 8,
