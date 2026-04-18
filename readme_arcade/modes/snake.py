@@ -227,16 +227,6 @@ def initial_body(
     return [(min(max(0, head_x + offset * step), width - 1), y) for offset in range(length)]
 
 
-def is_edge_row(y: int, height: int) -> bool:
-    return y == 0 or y == height - 1
-
-
-def keep_letter_food(user: str, pos: Position, height: int) -> bool:
-    if not is_edge_row(pos[1], height):
-        return True
-    return stable_byte(user, f"snake-edge-letter:{pos[0]}:{pos[1]}") < 58
-
-
 def build_food(user: str, width: int, height: int, calendar: dict | None, blocked: set[Position]) -> dict[Position, int]:
     counts, _total = counts_from_calendar(calendar, width, height)
     food: dict[Position, int] = {}
@@ -249,8 +239,6 @@ def build_food(user: str, width: int, height: int, calendar: dict | None, blocke
 
             count = counts[y][x]
             roll = stable_byte(user, f"snake-food:{x}:{y}")
-            if count <= 0 and is_edge_row(y, height) and roll > 28:
-                continue
             if count <= 0 and roll > 76:
                 continue
 
@@ -280,7 +268,7 @@ def build_food(user: str, width: int, height: int, calendar: dict | None, blocke
     while len(dark_cells) < 18 and attempts < width * height * 2:
         attempts += 1
         pos = (rng.randrange(0, width), rng.randrange(0, height))
-        if pos in blocked or is_edge_row(pos[1], height):
+        if pos in blocked:
             continue
         food[pos] = 1
         if pos not in dark_cells:
@@ -340,10 +328,9 @@ def choose_target(
     return min(
         food,
         key=lambda pos: (
-            manhattan(head, pos),
             darkness_priority(food[pos]),
-            actor_lane_priority(pos, width, height, actor)[0],
-            is_edge_row(pos[1], height),
+            *actor_lane_priority(pos, width, height, actor),
+            manhattan(head, pos),
             stable_byte(user, f"{actor}:target:{pos[0]}:{pos[1]}"),
         ),
     )
@@ -379,7 +366,7 @@ def choose_step(
     weave_y = stable_byte(user, f"{actor}:weave-y:{phase}") % height
     weave_x = stable_byte(user, f"{actor}:weave-x:{phase}") % width
 
-    if current_distance <= 7:
+    if current_distance <= 2:
         steering_target = target
     elif actor == "worm":
         steering_target = (max(width // 2, weave_x), weave_y)
@@ -400,19 +387,15 @@ def choose_step(
         turn_penalty = 4 if (dx, dy) == current_dir else 0
         if not turn_window:
             turn_penalty = 0 if (dx, dy) == current_dir else 2
-        if current_distance > 3 and straight_run >= 3 and (dx, dy) == current_dir:
+        if straight_run >= 3 and (dx, dy) == current_dir:
             turn_penalty += 14
-        if current_distance > 3 and last_direction and direction_run >= 4 and (dx, dy) == last_direction:
+        if last_direction and direction_run >= 4 and (dx, dy) == last_direction:
             progress_penalty += 8
             turn_penalty += 18
         edge_penalty = 3 if nx in (0, width - 1) or ny in (0, height - 1) else 0
         weave_score = manhattan(pos, steering_target)
         wiggle = stable_byte(user, f"{actor}:move:{frame}:{nx}:{ny}") % 5
-        if current_distance <= 7:
-            priority = (next_distance, progress_penalty, turn_penalty, edge_penalty, weave_score, wiggle)
-        else:
-            priority = (progress_penalty, turn_penalty, weave_score, next_distance // 2, edge_penalty, wiggle)
-        candidates.append((priority, pos))
+        candidates.append(((progress_penalty, turn_penalty, weave_score, next_distance // 2, edge_penalty, wiggle), pos))
 
     if candidates:
         return min(candidates, key=lambda item: item[0])[1]
@@ -599,7 +582,7 @@ def build_frames(user: str, options: dict[str, Any], calendar: dict | None, them
 
     blocked = set(body) | set(worm_body)
     field_food = build_food(user, width, height, calendar, blocked | set(letter_food))
-    food = {pos: level for pos, level in letter_food.items() if pos not in blocked and keep_letter_food(user, pos, height)}
+    food = {pos: level for pos, level in letter_food.items() if pos not in blocked}
 
     rendered: list[list[list[str]]] = [name_grid(user, width, height, theme) for _ in range(intro_frames)]
     birth_actors = [(snake_colors, body, 0.0)]
