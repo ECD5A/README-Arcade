@@ -120,7 +120,7 @@ Put this in your profile README:
 
 `transitionFrames` controls how many frames are used to blend the login mark into modes that support a softer start.
 
-For `snake`, `birthFrames` controls how the body emerges from the login letters, and `fieldRevealFrames` controls how slowly the rest of the food field appears. `length` sets the main body length, `maxLength` caps growth, and `growPerFood` controls how much the snake grows after eating a cell. Keep `growPerFood` at `0` for a clean runner that eats cells without getting long. The optional fast worm uses `worm`, `wormLength`, `wormSpeed`, and `wormGrowPerFood`.
+For `snake`, `birthFrames` controls how the body emerges from the login letters, `fieldRevealFrames` controls how quickly the food field appears, and `edgeRunDelay` / `edgeRunFrames` let the two real snakes briefly favor top and bottom row food during play. `length` sets the main body length, `maxLength` caps growth, and `growPerFood` controls how much the snake grows after eating a cell. Keep `growPerFood` at `0` for a clean runner that eats cells without getting long. The optional fast worm uses `worm`, `wormLength`, `wormSpeed`, and `wormGrowPerFood`.
 
 ```json
 {

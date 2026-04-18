@@ -310,6 +310,34 @@ def actor_lane_priority(pos: Position, width: int, height: int, actor: str) -> t
     return zone, lane
 
 
+def edge_run_target(
+    head: Position,
+    food: dict[Position, int],
+    actor: str,
+    width: int,
+    height: int,
+    frame: int,
+    delay: int,
+    run_frames: int,
+) -> Position | None:
+    if run_frames <= 0 or frame < delay or frame >= delay + run_frames:
+        return None
+
+    row = 0 if actor == "snake" else height - 1
+    row_food = [pos for pos in food if pos[1] == row]
+    if len(row_food) < 3:
+        return None
+
+    if actor == "snake":
+        forward = [pos for pos in row_food if pos[0] >= head[0]]
+        candidates = forward or row_food
+        return min(candidates, key=lambda pos: (abs(pos[0] - head[0]), pos[0]))
+
+    forward = [pos for pos in row_food if pos[0] <= head[0]]
+    candidates = forward or row_food
+    return min(candidates, key=lambda pos: (abs(pos[0] - head[0]), -pos[0]))
+
+
 def choose_target(
     user: str,
     head: Position,
@@ -318,9 +346,16 @@ def choose_target(
     actor: str,
     width: int,
     height: int,
+    frame: int,
+    edge_run_delay: int,
+    edge_run_frames: int,
 ) -> Position | None:
     if not food:
         return None
+
+    target = edge_run_target(head, food, actor, width, height, frame, edge_run_delay, edge_run_frames)
+    if target:
+        return target
 
     def darkness_priority(level: int) -> int:
         return level if theme_name == "dark" else 5 - level
@@ -366,7 +401,8 @@ def choose_step(
     weave_y = stable_byte(user, f"{actor}:weave-y:{phase}") % height
     weave_x = stable_byte(user, f"{actor}:weave-x:{phase}") % width
 
-    if current_distance <= 2:
+    edge_target = target[1] in (0, height - 1)
+    if current_distance <= 2 or edge_target:
         steering_target = target
     elif actor == "worm":
         steering_target = (max(width // 2, weave_x), weave_y)
@@ -384,6 +420,8 @@ def choose_step(
 
         next_distance = manhattan(pos, target)
         progress_penalty = 0 if next_distance <= current_distance else 2
+        if edge_target and next_distance > current_distance:
+            progress_penalty += 8
         turn_penalty = 4 if (dx, dy) == current_dir else 0
         if not turn_window:
             turn_penalty = 0 if (dx, dy) == current_dir else 2
@@ -439,8 +477,11 @@ def advance_actor(
     blocked: set[Position] | None = None,
     last_direction: tuple[int, int] | None = None,
     direction_run: int = 0,
+    edge_run_frame: int = 0,
+    edge_run_delay: int = 0,
+    edge_run_frames: int = 0,
 ) -> tuple[int, tuple[int, int], int]:
-    target = choose_target(user, body[0], food, theme_name, actor, width, height)
+    target = choose_target(user, body[0], food, theme_name, actor, width, height, edge_run_frame, edge_run_delay, edge_run_frames)
     previous_head = body[0]
     next_head = choose_step(
         user,
@@ -565,6 +606,8 @@ def build_frames(user: str, options: dict[str, Any], calendar: dict | None, them
     intro_frames = min(max(1, int(options.get("holdFrames", 12))), frames - 1)
     birth_frames = min(max(0, int(options.get("birthFrames", options.get("transitionFrames", 14)))), frames - intro_frames - 1)
     field_reveal_frames = max(1, int(options.get("fieldRevealFrames", 14)))
+    edge_run_delay = max(0, int(options.get("edgeRunDelay", 8)))
+    edge_run_frames = max(0, int(options.get("edgeRunFrames", 28)))
     start_length = min(max(4, int(options.get("length", 6))), max(4, width - 4))
     max_length = max(start_length, int(options.get("maxLength", 7)))
     grow_per_food = max(0, int(options.get("growPerFood", 0)))
@@ -623,6 +666,9 @@ def build_frames(user: str, options: dict[str, Any], calendar: dict | None, them
             set(worm_body),
             snake_direction,
             snake_run,
+            frame,
+            edge_run_delay,
+            edge_run_frames,
         )
         for consumed in before_food - set(food):
             field_food.pop(consumed, None)
@@ -645,6 +691,9 @@ def build_frames(user: str, options: dict[str, Any], calendar: dict | None, them
                     set(body),
                     worm_direction,
                     worm_run,
+                    frame,
+                    edge_run_delay,
+                    edge_run_frames,
                 )
                 for consumed in before_food - set(food):
                     field_food.pop(consumed, None)
@@ -662,6 +711,8 @@ def render(user: str, config: dict[str, Any], calendar: dict | None, out_dir: Pa
     options.setdefault("transitionFrames", 14)
     options.setdefault("birthFrames", 14)
     options.setdefault("fieldRevealFrames", 14)
+    options.setdefault("edgeRunDelay", 8)
+    options.setdefault("edgeRunFrames", 28)
     options.setdefault("length", 6)
     options.setdefault("maxLength", 7)
     options.setdefault("growPerFood", 0)
