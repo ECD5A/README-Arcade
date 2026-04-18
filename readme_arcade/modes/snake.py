@@ -328,14 +328,50 @@ def edge_run_target(
     if len(row_food) < 3:
         return None
 
+    direction = 1 if actor == "snake" else -1
+    if head[1] == row:
+        next_pos = (head[0] + direction, row)
+        if next_pos in food:
+            return next_pos
+
     if actor == "snake":
-        forward = [pos for pos in row_food if pos[0] >= head[0]]
+        forward = [pos for pos in row_food if pos[0] > head[0]]
         candidates = forward or row_food
         return min(candidates, key=lambda pos: (abs(pos[0] - head[0]), pos[0]))
 
-    forward = [pos for pos in row_food if pos[0] <= head[0]]
+    forward = [pos for pos in row_food if pos[0] < head[0]]
     candidates = forward or row_food
     return min(candidates, key=lambda pos: (abs(pos[0] - head[0]), -pos[0]))
+
+
+def edge_run_active(frame: int, delay: int, run_frames: int) -> bool:
+    return run_frames > 0 and delay <= frame < delay + run_frames
+
+
+def feed_next_edge_cell(
+    user: str,
+    food: dict[Position, int],
+    body: list[Position],
+    actor: str,
+    width: int,
+    height: int,
+    frame: int,
+    delay: int,
+    run_frames: int,
+    blocked: set[Position],
+) -> None:
+    if not edge_run_active(frame, delay, run_frames):
+        return
+
+    head = body[0]
+    row = 0 if actor == "snake" else height - 1
+    if head[1] != row:
+        return
+
+    direction = 1 if actor == "snake" else -1
+    pos = (head[0] + direction, row)
+    if 0 <= pos[0] < width and pos not in blocked:
+        food.setdefault(pos, 1 + (stable_byte(user, f"{actor}:edge-step-food:{pos[0]}:{pos[1]}") % 4))
 
 
 def choose_target(
@@ -646,6 +682,9 @@ def build_frames(user: str, options: dict[str, Any], calendar: dict | None, them
     for frame in range(frames - len(rendered)):
         reveal_step = min(birth_frames + frame, field_reveal_frames - 1)
         reveal_field_food(user, food, field_food, reveal_step, field_reveal_frames, set(body) | set(worm_body))
+        feed_next_edge_cell(user, food, body, "snake", width, height, frame, edge_run_delay, edge_run_frames, set(worm_body))
+        if worm_enabled:
+            feed_next_edge_cell(user, food, worm_body, "worm", width, height, frame, edge_run_delay, edge_run_frames, set(body))
 
         actors = [(worm_colors, worm_body), (snake_colors, body)] if worm_enabled else [(snake_colors, body)]
         rendered.append(render_game_frame(theme, actors, width, height, food))
@@ -674,7 +713,9 @@ def build_frames(user: str, options: dict[str, Any], calendar: dict | None, them
             field_food.pop(consumed, None)
 
         if worm_enabled:
-            for substep in range(worm_speed):
+            active_edge_run = edge_run_active(frame, edge_run_delay, edge_run_frames)
+            current_worm_speed = 1 if active_edge_run else worm_speed
+            for substep in range(current_worm_speed):
                 before_food = set(food)
                 worm_growth, worm_direction, worm_run = advance_actor(
                     user,
