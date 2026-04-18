@@ -34,8 +34,8 @@
     "wormMaxLength": 5,
     "wormSpeed": 2,
     "wormGrowPerFood": 0,
-    "titleLeft": "SNAKE TRACE",
-    "titleRight": "PINK HEAD // DARKEST FIRST"
+    "titleLeft": "SNAKE",
+    "titleRight": ""
   },
   "pacman": {
     "frames": 96,

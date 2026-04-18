@@ -363,8 +363,8 @@ def build_frames(user: str, options: dict[str, Any], calendar: dict | None, them
 
 def render(user: str, config: dict[str, Any], calendar: dict | None, out_dir: Path) -> list[Path]:
     options = dict(config.get("snake", {}))
-    options.setdefault("titleLeft", "SNAKE TRACE")
-    options.setdefault("titleRight", "PINK HEAD // DARKEST FIRST")
+    options.setdefault("titleLeft", "SNAKE")
+    options.setdefault("titleRight", "")
     options.setdefault("duration", "40s")
     options.setdefault("frames", 120)
     options.setdefault("holdFrames", 12)
