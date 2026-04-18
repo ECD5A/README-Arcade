@@ -2,11 +2,11 @@
   "user": "YOUR_LOGIN",
   "mode": "snake",
   "snake": {
-    "duration": "44s",
+    "duration": "40s",
     "frames": 120,
     "holdFrames": 12,
-    "length": 8,
-    "maxLength": 9,
+    "length": 6,
+    "maxLength": 7,
     "growPerFood": 0,
     "titleLeft": "SNAKE TRACE",
     "titleRight": "PINK HEAD // DARKEST FIRST"

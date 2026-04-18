@@ -73,7 +73,8 @@ def name_grid(user: str, width: int, height: int, theme: dict[str, str]) -> list
             for dx, value in enumerate(row):
                 x = gx + dx
                 if value == "1" and 0 <= x < width:
-                    grid[gy][x] = theme["level4"]
+                    level = 1 + ((stable_byte(user, f"name:{index}:{dx}:{y}") + x + gy) % 4)
+                    grid[gy][x] = theme[f"level{level}"]
 
     return grid
 
@@ -235,8 +236,8 @@ def build_frames(user: str, options: dict[str, Any], calendar: dict | None, them
     height = box["height"]
     frames = int(options.get("frames", 120))
     intro_frames = min(max(1, int(options.get("holdFrames", 12))), frames - 1)
-    start_length = min(max(4, int(options.get("length", 8))), max(4, width - 4))
-    max_length = max(start_length, int(options.get("maxLength", 9)))
+    start_length = min(max(4, int(options.get("length", 6))), max(4, width - 4))
+    max_length = max(start_length, int(options.get("maxLength", 7)))
     grow_per_food = max(0, int(options.get("growPerFood", 0)))
 
     body = initial_body(width, height, start_length)
@@ -270,11 +271,11 @@ def render(user: str, config: dict[str, Any], calendar: dict | None, out_dir: Pa
     options = dict(config.get("snake", {}))
     options.setdefault("titleLeft", "SNAKE TRACE")
     options.setdefault("titleRight", "PINK HEAD // DARKEST FIRST")
-    options.setdefault("duration", "44s")
+    options.setdefault("duration", "40s")
     options.setdefault("frames", 120)
     options.setdefault("holdFrames", 12)
-    options.setdefault("length", 8)
-    options.setdefault("maxLength", 9)
+    options.setdefault("length", 6)
+    options.setdefault("maxLength", 7)
     options.setdefault("growPerFood", 0)
     options.setdefault("width", 53)
     options.setdefault("height", 7)

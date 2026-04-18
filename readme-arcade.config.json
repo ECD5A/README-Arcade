@@ -24,10 +24,10 @@
   },
   "snake": {
     "frames": 120,
-    "duration": "44s",
+    "duration": "40s",
     "holdFrames": 12,
-    "length": 8,
-    "maxLength": 9,
+    "length": 6,
+    "maxLength": 7,
     "growPerFood": 0,
     "titleLeft": "SNAKE TRACE",
     "titleRight": "PINK HEAD // DARKEST FIRST"
