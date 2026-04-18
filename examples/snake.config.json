@@ -8,6 +8,11 @@
     "length": 6,
     "maxLength": 7,
     "growPerFood": 0,
+    "worm": true,
+    "wormLength": 5,
+    "wormMaxLength": 5,
+    "wormSpeed": 2,
+    "wormGrowPerFood": 0,
     "titleLeft": "SNAKE TRACE",
     "titleRight": "PINK HEAD // DARKEST FIRST"
   }
