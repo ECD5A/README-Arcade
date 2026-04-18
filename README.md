@@ -33,7 +33,7 @@ It is built around GitHub contribution-style grids: small cells, dark/light them
 Available modes:
 
 - `lifegrid`: Conway Game of Life, started from your GitHub login.
-- `snake`: a snake trace moving through the grid.
+- `snake`: a pink-headed snake starts after the login intro and eats the darkest cells first.
 - `pacman`: a dot eater moving through a contribution-style field.
 
 ## Gallery
@@ -105,7 +105,9 @@ Put this in your profile README:
 
 `frames` controls how many precomputed states are embedded into that loop. More frames make the loop feel longer and less repetitive.
 
-`holdFrames` controls how long the initial login mark stays visible before `lifegrid` starts evolving.
+`holdFrames` controls how long the initial login mark stays visible before the selected mode starts moving.
+
+For `snake`, `length` sets the starting body length, `maxLength` caps growth, and `growPerFood` controls how much the snake grows after eating a cell.
 
 ```json
 {
