@@ -297,7 +297,20 @@ def choose_step(
     body_block = set(body[:-1])
     if blocked:
         body_block.update(blocked)
-    candidates: list[tuple[tuple[int, int, int, int], Position]] = []
+    candidates: list[tuple[tuple[int, int, int, int, int, int], Position]] = []
+    current_distance = manhattan(head, target)
+    phase_size = 2 if actor == "worm" else 3
+    phase = frame // phase_size
+    turn_window = stable_byte(user, f"{actor}:turn-window:{phase}:{head[0]}:{head[1]}") < (205 if actor == "worm" else 185)
+    weave_y = stable_byte(user, f"{actor}:weave-y:{phase}") % height
+    weave_x = stable_byte(user, f"{actor}:weave-x:{phase}") % width
+
+    if current_distance <= 2:
+        steering_target = target
+    elif actor == "worm":
+        steering_target = (max(width // 2, weave_x), weave_y)
+    else:
+        steering_target = (min((width // 2) - 1, weave_x), weave_y)
 
     for dx, dy in directions:
         nx = head[0] + dx
@@ -308,10 +321,15 @@ def choose_step(
         if pos in body_block:
             continue
 
-        turn_penalty = 0 if (dx, dy) == current_dir else 1
-        edge_penalty = 1 if nx in (0, width - 1) or ny in (0, height - 1) else 0
-        wiggle = stable_byte(user, f"{actor}:move:{frame}:{nx}:{ny}") % 3
-        candidates.append(((manhattan(pos, target), turn_penalty, edge_penalty, wiggle), pos))
+        next_distance = manhattan(pos, target)
+        progress_penalty = 0 if next_distance <= current_distance else 5
+        turn_penalty = 4 if (dx, dy) == current_dir else 0
+        if not turn_window:
+            turn_penalty = 0 if (dx, dy) == current_dir else 2
+        edge_penalty = 3 if nx in (0, width - 1) or ny in (0, height - 1) else 0
+        weave_score = manhattan(pos, steering_target)
+        wiggle = stable_byte(user, f"{actor}:move:{frame}:{nx}:{ny}") % 5
+        candidates.append(((progress_penalty, weave_score, next_distance // 2, turn_penalty, edge_penalty, wiggle), pos))
 
     if candidates:
         return min(candidates, key=lambda item: item[0])[1]
