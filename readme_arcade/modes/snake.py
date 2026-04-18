@@ -431,14 +431,14 @@ def choose_step(
         body_block.update(blocked)
     candidates: list[tuple[tuple[int, int, int, int, int, int], Position]] = []
     current_distance = manhattan(head, target)
-    phase_size = 2 if actor == "worm" else 3
+    phase_size = 5 if actor == "worm" else 6
     phase = frame // phase_size
-    turn_window = stable_byte(user, f"{actor}:turn-window:{phase}:{head[0]}:{head[1]}") < (205 if actor == "worm" else 185)
+    turn_window = stable_byte(user, f"{actor}:turn-window:{phase}:{head[0]}:{head[1]}") < (72 if actor == "worm" else 64)
     weave_y = stable_byte(user, f"{actor}:weave-y:{phase}") % height
     weave_x = stable_byte(user, f"{actor}:weave-x:{phase}") % width
 
     edge_target = target[1] in (0, height - 1)
-    if current_distance <= 2 or edge_target:
+    if current_distance <= 7 or edge_target:
         steering_target = target
     elif actor == "worm":
         steering_target = (max(width // 2, weave_x), weave_y)
@@ -455,21 +455,28 @@ def choose_step(
             continue
 
         next_distance = manhattan(pos, target)
-        progress_penalty = 0 if next_distance <= current_distance else 2
+        if next_distance < current_distance:
+            progress_penalty = 0
+        elif next_distance == current_distance:
+            progress_penalty = 3
+        else:
+            progress_penalty = 9
         if edge_target and next_distance > current_distance:
-            progress_penalty += 8
-        turn_penalty = 4 if (dx, dy) == current_dir else 0
-        if not turn_window:
-            turn_penalty = 0 if (dx, dy) == current_dir else 2
-        if straight_run >= 3 and (dx, dy) == current_dir:
-            turn_penalty += 14
-        if last_direction and direction_run >= 4 and (dx, dy) == last_direction:
-            progress_penalty += 8
-            turn_penalty += 18
+            progress_penalty += 10
+        turn_penalty = 0 if (dx, dy) == current_dir else 3
+        if turn_window:
+            turn_penalty = 1 if (dx, dy) == current_dir else 0
+        if next_distance < current_distance and (dx, dy) != current_dir:
+            turn_penalty = max(0, turn_penalty - 2)
+        if straight_run >= 6 and (dx, dy) == current_dir and current_distance > 2:
+            turn_penalty += 4
+        if last_direction and direction_run >= 8 and (dx, dy) == last_direction:
+            progress_penalty += 3
+            turn_penalty += 5
         edge_penalty = 3 if nx in (0, width - 1) or ny in (0, height - 1) else 0
         weave_score = manhattan(pos, steering_target)
-        wiggle = stable_byte(user, f"{actor}:move:{frame}:{nx}:{ny}") % 5
-        candidates.append(((progress_penalty, turn_penalty, weave_score, next_distance // 2, edge_penalty, wiggle), pos))
+        wiggle = stable_byte(user, f"{actor}:move:{frame}:{nx}:{ny}") % 3
+        candidates.append(((progress_penalty, next_distance, turn_penalty, edge_penalty, weave_score // 2, wiggle), pos))
 
     if candidates:
         return min(candidates, key=lambda item: item[0])[1]
@@ -613,6 +620,7 @@ def render_birth_frame(
 ) -> list[list[str]]:
     grid = name_grid(user, width, height, theme)
     progress = (frame + 1) / max(1, total_frames)
+    progress = 1.0 - ((1.0 - progress) ** 2)
 
     for (x, y), level in food.items():
         if grid[y][x] == theme["level0"]:
@@ -640,8 +648,8 @@ def build_frames(user: str, options: dict[str, Any], calendar: dict | None, them
     height = box["height"]
     frames = int(options.get("frames", 120))
     intro_frames = min(max(1, int(options.get("holdFrames", 12))), frames - 1)
-    birth_frames = min(max(0, int(options.get("birthFrames", options.get("transitionFrames", 14)))), frames - intro_frames - 1)
-    field_reveal_frames = max(1, int(options.get("fieldRevealFrames", 14)))
+    birth_frames = min(max(0, int(options.get("birthFrames", options.get("transitionFrames", 8)))), frames - intro_frames - 1)
+    field_reveal_frames = max(1, int(options.get("fieldRevealFrames", 7)))
     edge_run_delay = max(0, int(options.get("edgeRunDelay", 8)))
     edge_run_frames = max(0, int(options.get("edgeRunFrames", 28)))
     start_length = min(max(4, int(options.get("length", 6))), max(4, width - 4))
@@ -666,7 +674,7 @@ def build_frames(user: str, options: dict[str, Any], calendar: dict | None, them
     rendered: list[list[list[str]]] = [name_grid(user, width, height, theme) for _ in range(intro_frames)]
     birth_actors = [(snake_colors, body, 0.0)]
     if worm_enabled:
-        birth_actors.insert(0, (worm_colors, worm_body, 0.18))
+        birth_actors.insert(0, (worm_colors, worm_body, 0.08))
     for frame in range(birth_frames):
         reveal_step = min(frame, field_reveal_frames - 1)
         reveal_field_food(user, food, field_food, reveal_step, field_reveal_frames, set(body) | set(worm_body))
@@ -749,9 +757,9 @@ def render(user: str, config: dict[str, Any], calendar: dict | None, out_dir: Pa
     options.setdefault("duration", "40s")
     options.setdefault("frames", 120)
     options.setdefault("holdFrames", 12)
-    options.setdefault("transitionFrames", 14)
-    options.setdefault("birthFrames", 14)
-    options.setdefault("fieldRevealFrames", 14)
+    options.setdefault("transitionFrames", 8)
+    options.setdefault("birthFrames", 8)
+    options.setdefault("fieldRevealFrames", 7)
     options.setdefault("edgeRunDelay", 8)
     options.setdefault("edgeRunFrames", 28)
     options.setdefault("length", 6)
