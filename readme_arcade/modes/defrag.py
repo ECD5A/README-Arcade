@@ -31,7 +31,8 @@ def build_disk(user: str, width: int, height: int, theme: dict[str, str]) -> tup
         y = index // width
         roll = stable_byte(user, f"defrag-cell:{x}:{y}")
         stripe = (x // 4) + (y * 3)
-        if roll < 58 or (x + y) % 17 == 0:
+        open_lane = x % 13 == 0 or ((x + (y * 3)) % 19 == 0)
+        if roll < 122 or open_lane:
             fragmented.append(theme["level0"])
             continue
 
@@ -46,7 +47,21 @@ def build_disk(user: str, width: int, height: int, theme: dict[str, str]) -> tup
             stable_byte(user, f"defrag-order:{len(blocks)}:{color}"),
         ),
     )
-    compacted = ordered + [theme["level0"]] * (total - len(ordered))
+    compacted = [theme["level0"]] * total
+    write_index = 0
+    for color in ordered:
+        while write_index < total:
+            x = write_index % width
+            y = write_index // width
+            spacer = x % 12 == 11 or (x + y) % 23 == 0
+            if not spacer:
+                break
+            write_index += 1
+        if write_index >= total:
+            break
+        compacted[write_index] = color
+        write_index += 1
+
     return fragmented, compacted
 
 
@@ -73,7 +88,7 @@ def render_defrag_frame(
         settle += (stable_byte(user, f"defrag-settle:{index}") / 255) * 0.26
         color = compacted[index] if progress >= settle else fragmented[index]
 
-        if color == theme["level0"] and stable_byte(user, f"defrag-static:{frame // 6}:{index}") < 10:
+        if color == theme["level0"] and stable_byte(user, f"defrag-static:{frame // 8}:{index}") < 3:
             color = theme["level1"]
 
         grid[y][x] = color

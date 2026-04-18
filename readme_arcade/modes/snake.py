@@ -109,15 +109,15 @@ def body_from_head(
     width: int,
     height: int,
     blocked: set[Position] | None = None,
+    facing: int = 1,
 ) -> list[Position]:
     hx, hy = head
     occupied = blocked or set()
-    trails = (
-        [(-offset, 0) for offset in range(length)],
-        [(offset, 0) for offset in range(length)],
-        [(0, -offset) for offset in range(length)],
-        [(0, offset) for offset in range(length)],
-    )
+    horizontal = [(-offset, 0) for offset in range(length)]
+    opposite = [(offset, 0) for offset in range(length)]
+    if facing < 0:
+        horizontal, opposite = opposite, horizontal
+    trails = (horizontal, [(0, -offset) for offset in range(length)], [(0, offset) for offset in range(length)], opposite)
 
     for offsets in trails:
         body = [(hx + dx, hy + dy) for dx, dy in offsets]
@@ -145,7 +145,7 @@ def choose_name_head(
         return (min(width - 2, max(1, width // 3)), height // 2)
 
     target_x = width // 3 if actor == "snake" else (width * 2) // 3
-    target_y = height // 2 if actor == "snake" else max(0, (height // 2) - 2)
+    target_y = min(height - 1, (height // 2) + 1) if actor == "snake" else max(0, (height // 2) - 2)
     return min(
         candidates,
         key=lambda pos: (
@@ -241,7 +241,26 @@ def reveal_field_food(
             food[pos] = level
 
 
-def choose_target(user: str, head: Position, food: dict[Position, int], theme_name: str, actor: str) -> Position | None:
+def actor_lane_priority(pos: Position, width: int, height: int, actor: str) -> tuple[int, int]:
+    x, y = pos
+    if actor == "worm":
+        zone = 0 if x >= width // 2 else 1
+        lane = abs(y - max(0, height // 3))
+    else:
+        zone = 0 if x < width // 2 else 1
+        lane = abs(y - min(height - 1, (height * 2) // 3))
+    return zone, lane
+
+
+def choose_target(
+    user: str,
+    head: Position,
+    food: dict[Position, int],
+    theme_name: str,
+    actor: str,
+    width: int,
+    height: int,
+) -> Position | None:
     if not food:
         return None
 
@@ -252,6 +271,7 @@ def choose_target(user: str, head: Position, food: dict[Position, int], theme_na
         food,
         key=lambda pos: (
             darkness_priority(food[pos]),
+            *actor_lane_priority(pos, width, height, actor),
             manhattan(head, pos),
             stable_byte(user, f"{actor}:target:{pos[0]}:{pos[1]}"),
         ),
@@ -320,7 +340,7 @@ def advance_actor(
     growth: int,
     blocked: set[Position] | None = None,
 ) -> int:
-    target = choose_target(user, body[0], food, theme_name, actor)
+    target = choose_target(user, body[0], food, theme_name, actor, width, height)
     next_head = choose_step(user, frame, actor, body[0], target, body, width, height, blocked)
     body.insert(0, next_head)
 
@@ -399,7 +419,7 @@ def build_frames(user: str, options: dict[str, Any], calendar: dict | None, them
     worm_body: list[Position] = []
     if worm_enabled:
         worm_head = choose_name_head(user, letter_cells, "worm", width, height, set(body))
-        worm_body = body_from_head(worm_head, worm_length, width, height, set(body))
+        worm_body = body_from_head(worm_head, worm_length, width, height, set(body), facing=-1)
 
     blocked = set(body) | set(worm_body)
     field_food = build_food(user, width, height, calendar, blocked | set(letter_food))
