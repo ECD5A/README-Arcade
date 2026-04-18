@@ -285,16 +285,18 @@ def reveal_field_food(
     reveal_frames: int,
     blocked: set[Position],
 ) -> None:
-    if reveal_frames <= 0:
-        threshold = 255
-    else:
-        threshold = min(255, int(((frame + 1) / reveal_frames) * 255))
-
-    for pos, level in list(field_food.items()):
+    threshold = reveal_threshold(frame, reveal_frames)
+    for pos, level in field_food.items():
         if pos in blocked or pos in food:
             continue
         if stable_byte(user, f"snake-field:{pos[0]}:{pos[1]}") <= threshold:
             food[pos] = level
+
+
+def reveal_threshold(frame: int, reveal_frames: int) -> int:
+    if reveal_frames <= 0:
+        return 255
+    return min(255, int(((frame + 1) / reveal_frames) * 255))
 
 
 def actor_lane_priority(pos: Position, width: int, height: int, actor: str) -> tuple[int, int]:
@@ -528,11 +530,16 @@ def render_birth_frame(
     actors: list[tuple[dict[str, str], list[Position], float]],
     width: int,
     height: int,
+    food: dict[Position, int],
     frame: int,
     total_frames: int,
 ) -> list[list[str]]:
     grid = name_grid(user, width, height, theme)
     progress = (frame + 1) / max(1, total_frames)
+
+    for (x, y), level in food.items():
+        if grid[y][x] == theme["level0"]:
+            grid[y][x] = theme[FOOD_LEVELS[level]]
 
     for colors, body, delay in actors:
         local_progress = max(0.0, min(1.0, (progress - delay) / max(0.01, 1.0 - delay)))
@@ -557,7 +564,7 @@ def build_frames(user: str, options: dict[str, Any], calendar: dict | None, them
     frames = int(options.get("frames", 120))
     intro_frames = min(max(1, int(options.get("holdFrames", 12))), frames - 1)
     birth_frames = min(max(0, int(options.get("birthFrames", options.get("transitionFrames", 14)))), frames - intro_frames - 1)
-    field_reveal_frames = max(1, int(options.get("fieldRevealFrames", 22)))
+    field_reveal_frames = max(1, int(options.get("fieldRevealFrames", 14)))
     start_length = min(max(4, int(options.get("length", 6))), max(4, width - 4))
     max_length = max(start_length, int(options.get("maxLength", 7)))
     grow_per_food = max(0, int(options.get("growPerFood", 0)))
@@ -582,7 +589,9 @@ def build_frames(user: str, options: dict[str, Any], calendar: dict | None, them
     if worm_enabled:
         birth_actors.insert(0, (worm_colors, worm_body, 0.18))
     for frame in range(birth_frames):
-        rendered.append(render_birth_frame(user, theme, birth_actors, width, height, frame, birth_frames))
+        reveal_step = min(frame, field_reveal_frames - 1)
+        reveal_field_food(user, food, field_food, reveal_step, field_reveal_frames, set(body) | set(worm_body))
+        rendered.append(render_birth_frame(user, theme, birth_actors, width, height, food, frame, birth_frames))
 
     growth = 0
     worm_growth = 0
@@ -592,7 +601,7 @@ def build_frames(user: str, options: dict[str, Any], calendar: dict | None, them
     worm_run = 0
 
     for frame in range(frames - len(rendered)):
-        reveal_step = min(frame, field_reveal_frames - 1)
+        reveal_step = min(birth_frames + frame, field_reveal_frames - 1)
         reveal_field_food(user, food, field_food, reveal_step, field_reveal_frames, set(body) | set(worm_body))
 
         actors = [(worm_colors, worm_body), (snake_colors, body)] if worm_enabled else [(snake_colors, body)]
@@ -652,7 +661,7 @@ def render(user: str, config: dict[str, Any], calendar: dict | None, out_dir: Pa
     options.setdefault("holdFrames", 12)
     options.setdefault("transitionFrames", 14)
     options.setdefault("birthFrames", 14)
-    options.setdefault("fieldRevealFrames", 22)
+    options.setdefault("fieldRevealFrames", 14)
     options.setdefault("length", 6)
     options.setdefault("maxLength", 7)
     options.setdefault("growPerFood", 0)

@@ -39,7 +39,7 @@ DEFAULT_CONFIG: dict[str, Any] = {
         "holdFrames": 12,
         "transitionFrames": 14,
         "birthFrames": 14,
-        "fieldRevealFrames": 22,
+        "fieldRevealFrames": 14,
         "length": 6,
         "maxLength": 7,
         "growPerFood": 0,
