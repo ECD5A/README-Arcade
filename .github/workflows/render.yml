@@ -7,8 +7,6 @@ on:
         description: "Optional GitHub login override"
         required: false
         type: string
-  schedule:
-    - cron: "17 4 * * *"
   push:
     branches:
       - main

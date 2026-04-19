@@ -1,7 +1,7 @@
 <h1 align="center">README Arcade</h1>
 
 <p align="center">
-  Animated GitHub contribution-grid arcade blocks for profile READMEs.
+  Turn your GitHub login into an animated contribution-grid arcade block.
 </p>
 
 <p align="center">
@@ -24,27 +24,50 @@
   </picture>
 </p>
 
-## What Is This?
+## Quick Start
 
-README Arcade generates animated SVG blocks that look like GitHub contribution grids, but behave like tiny retro screens.
+1. Fork this repository.
 
-It is made for profile READMEs:
+2. Open `readme-arcade.config.json` and change three fields:
 
-- no JavaScript
-- no package install
-- dark and light SVG output
-- deterministic animation from your GitHub login
-- optional daily rebuild through GitHub Actions
-- optional GitHub contribution data when `GITHUB_TOKEN` is available
+```json
+{
+  "user": "YOUR_LOGIN",
+  "mode": "snake",
+  "speed": "normal"
+}
+```
 
-The project stays in Python because it is the easiest path for forks: GitHub Actions already has it, Windows/macOS/Linux can run it, and there is no compiler or Node dependency chain to explain. C/C++ would be fun, but it would make setup heavier for most people.
+`user` is your GitHub login. `mode` is `lifegrid`, `snake`, `matrix`, or `defrag`. `speed` is `slow`, `normal`, `fast`, or `turbo`.
+
+3. Commit the file. GitHub Actions will render SVG files into `dist/`.
+
+If Actions are disabled in your fork, open the Actions tab, enable workflows, then run `render README Arcade` once.
+
+4. Paste this into your profile README.
+
+Your profile README is the `README.md` file inside the special repository named `YOUR_LOGIN/YOUR_LOGIN`.
+
+```html
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/YOUR_LOGIN/readme-arcade/main/dist/readme-arcade-dark.svg">
+    <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/YOUR_LOGIN/readme-arcade/main/dist/readme-arcade.svg">
+    <img src="https://raw.githubusercontent.com/YOUR_LOGIN/readme-arcade/main/dist/readme-arcade.svg" width="920" alt="README Arcade">
+  </picture>
+</p>
+```
+
+Replace `YOUR_LOGIN` in the snippet. If your fork has another repository name, replace `readme-arcade` too.
 
 ## Modes
 
-- `lifegrid`: Conway's Game of Life, seeded from your GitHub login.
-- `snake`: a short snake and a faster worm appear from your login cells and eat GitHub-colored squares.
-- `matrix`: code rain drops over the login intro and keeps a contribution-grid look.
-- `defrag`: a Windows 98-style disk map that compacts fragmented cells.
+| Mode | What it does |
+| --- | --- |
+| `lifegrid` | Conway's Game of Life starts from your login. |
+| `snake` | A snake and a fast worm appear from your login and eat GitHub-colored cells. |
+| `matrix` | Code rain drops over your login. |
+| `defrag` | A Windows 98-style disk map compacts fragmented cells. |
 
 ## Gallery
 
@@ -88,53 +111,20 @@ The project stays in Python because it is the easiest path for forks: GitHub Act
   </picture>
 </p>
 
-## Quick Start
+## Local Preview
 
-Fork this repository and edit `readme-arcade.config.json`:
+You do not need local setup if you use GitHub Actions. Local render is optional:
 
-```json
-{
-  "user": "YOUR_LOGIN",
-  "mode": "snake",
-  "speed": "normal"
-}
+```bash
+python scripts/render.py
+python scripts/render_gallery.py
 ```
 
-Commit the change. The included GitHub Action renders the SVG files into `dist/`.
-If Actions are disabled in your fork, open the Actions tab and enable workflows once.
+Open `preview/index.html` to view all modes.
 
-Use this in your GitHub profile README. Replace `YOUR_LOGIN` and `readme-arcade` if your fork has a different owner or repository name:
+## Advanced Config
 
-```html
-<p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/YOUR_LOGIN/readme-arcade/main/dist/readme-arcade-dark.svg">
-    <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/YOUR_LOGIN/readme-arcade/main/dist/readme-arcade.svg">
-    <img src="https://raw.githubusercontent.com/YOUR_LOGIN/readme-arcade/main/dist/readme-arcade.svg" width="920" alt="README Arcade">
-  </picture>
-</p>
-```
-
-That is the whole basic setup.
-The same snippet is also in `examples/profile-readme.md`.
-
-## Config
-
-Most users only need three fields:
-
-```json
-{
-  "user": "YOUR_LOGIN",
-  "mode": "lifegrid",
-  "speed": "normal"
-}
-```
-
-`mode` can be `lifegrid`, `snake`, `matrix`, or `defrag`.
-
-`speed` can be `slow`, `normal`, `fast`, or `turbo`.
-
-If you want deeper control, you can still override any mode block:
+The small config is enough for most users. You can still override a mode:
 
 ```json
 {
@@ -143,45 +133,12 @@ If you want deeper control, you can still override any mode block:
   "speed": "fast",
   "snake": {
     "duration": "24s",
-    "frames": 120,
     "titleLeft": "SNAKE"
   }
 }
 ```
 
 Mode-specific `duration` wins over `speed`.
-
-## Local Render
-
-Render the selected mode:
-
-```bash
-python scripts/render.py --config readme-arcade.config.json --out-dir dist
-```
-
-Render another mode without editing the config:
-
-```bash
-python scripts/render.py --mode matrix --base-name readme-arcade --out-dir dist
-```
-
-Render the gallery:
-
-```bash
-python scripts/render_gallery.py
-```
-
-Open `preview/index.html` to view all modes locally.
-
-## GitHub Actions
-
-The workflow in `.github/workflows/render.yml` renders SVG files:
-
-- on push
-- once per day
-- manually from the Actions tab
-
-Daily rebuilds let contribution-based cells change over time.
 
 ## Support
 
