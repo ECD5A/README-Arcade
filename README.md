@@ -114,24 +114,6 @@ python scripts/render_gallery.py
 
 Open `preview/index.html` to view all modes.
 
-## Advanced Config
-
-The small config is enough for most users. You can still override a mode:
-
-```json
-{
-  "user": "YOUR_LOGIN",
-  "mode": "snake",
-  "speed": "fast",
-  "snake": {
-    "duration": "24s",
-    "titleLeft": "SNAKE"
-  }
-}
-```
-
-Mode-specific `duration` wins over `speed`.
-
 ## Donate
 
 If README Arcade helped your profile, tips are welcome:
