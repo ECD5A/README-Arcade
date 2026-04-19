@@ -1,12 +1,5 @@
 {
   "user": "YOUR_LOGIN",
   "mode": "lifegrid",
-  "lifegrid": {
-    "duration": "42s",
-    "frames": 96,
-    "holdFrames": 4,
-    "density": "balanced",
-    "titleLeft": "CONWAY LIFEGRID",
-    "titleRight": "B3/S23"
-  }
+  "speed": "normal"
 }

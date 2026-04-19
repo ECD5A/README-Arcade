@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from copy import deepcopy
 from pathlib import Path
 from typing import Any
 
@@ -10,6 +11,7 @@ from typing import Any
 DEFAULT_CONFIG: dict[str, Any] = {
     "user": "ECD5A",
     "mode": "lifegrid",
+    "speed": "normal",
     "output": {
         "baseName": "readme-arcade",
     },
@@ -35,11 +37,11 @@ DEFAULT_CONFIG: dict[str, Any] = {
         "width": 53,
         "height": 7,
         "frames": 120,
-        "duration": "40s",
+        "duration": "32s",
         "holdFrames": 12,
-        "transitionFrames": 14,
-        "birthFrames": 14,
-        "fieldRevealFrames": 14,
+        "transitionFrames": 8,
+        "birthFrames": 8,
+        "fieldRevealFrames": 7,
         "edgeRunDelay": 8,
         "edgeRunFrames": 28,
         "length": 6,
@@ -93,6 +95,34 @@ DEFAULT_CONFIG: dict[str, Any] = {
 }
 
 
+SPEED_PRESETS: dict[str, dict[str, str]] = {
+    "slow": {
+        "lifegrid": "54s",
+        "snake": "40s",
+        "matrix": "46s",
+        "defrag": "54s",
+    },
+    "normal": {
+        "lifegrid": "42s",
+        "snake": "32s",
+        "matrix": "36s",
+        "defrag": "42s",
+    },
+    "fast": {
+        "lifegrid": "34s",
+        "snake": "26s",
+        "matrix": "28s",
+        "defrag": "34s",
+    },
+    "turbo": {
+        "lifegrid": "26s",
+        "snake": "20s",
+        "matrix": "22s",
+        "defrag": "26s",
+    },
+}
+
+
 def deep_merge(base: dict[str, Any], override: dict[str, Any]) -> dict[str, Any]:
     merged = dict(base)
     for key, value in override.items():
@@ -103,12 +133,27 @@ def deep_merge(base: dict[str, Any], override: dict[str, Any]) -> dict[str, Any]
     return merged
 
 
+def apply_speed_preset(config: dict[str, Any], override: dict[str, Any]) -> dict[str, Any]:
+    speed = str(config.get("speed", "normal")).lower()
+    if speed not in SPEED_PRESETS:
+        available = ", ".join(SPEED_PRESETS)
+        raise ValueError(f"unknown speed {speed!r}; available speeds: {available}")
+
+    for mode, duration in SPEED_PRESETS[speed].items():
+        mode_override = override.get(mode, {})
+        if isinstance(mode_override, dict) and "duration" in mode_override:
+            continue
+        config.setdefault(mode, {})["duration"] = duration
+
+    return config
+
+
 def load_config(path: Path) -> dict[str, Any]:
     if not path.exists():
-        return dict(DEFAULT_CONFIG)
+        return apply_speed_preset(deepcopy(DEFAULT_CONFIG), {})
 
     data = json.loads(path.read_text(encoding="utf-8"))
     if not isinstance(data, dict):
         raise ValueError(f"{path} must contain a JSON object")
 
-    return deep_merge(DEFAULT_CONFIG, data)
+    return apply_speed_preset(deep_merge(deepcopy(DEFAULT_CONFIG), data), data)

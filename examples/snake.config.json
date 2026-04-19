@@ -1,24 +1,5 @@
 {
   "user": "YOUR_LOGIN",
   "mode": "snake",
-  "snake": {
-    "duration": "32s",
-    "frames": 120,
-    "holdFrames": 12,
-    "transitionFrames": 8,
-    "birthFrames": 8,
-    "fieldRevealFrames": 7,
-    "edgeRunDelay": 8,
-    "edgeRunFrames": 28,
-    "length": 6,
-    "maxLength": 7,
-    "growPerFood": 0,
-    "worm": true,
-    "wormLength": 5,
-    "wormMaxLength": 5,
-    "wormSpeed": 2,
-    "wormGrowPerFood": 0,
-    "titleLeft": "SNAKE",
-    "titleRight": ""
-  }
+  "speed": "normal"
 }

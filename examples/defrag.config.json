@@ -1,11 +1,5 @@
 {
   "user": "YOUR_LOGIN",
   "mode": "defrag",
-  "defrag": {
-    "duration": "42s",
-    "frames": 120,
-    "holdFrames": 12,
-    "titleLeft": "DEFRAG",
-    "titleRight": ""
-  }
+  "speed": "normal"
 }

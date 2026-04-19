@@ -1,12 +1,5 @@
 {
   "user": "YOUR_LOGIN",
   "mode": "matrix",
-  "matrix": {
-    "duration": "36s",
-    "frames": 120,
-    "holdFrames": 12,
-    "transitionFrames": 10,
-    "titleLeft": "MATRIX",
-    "titleRight": ""
-  }
+  "speed": "normal"
 }
