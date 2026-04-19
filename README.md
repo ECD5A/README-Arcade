@@ -132,7 +132,7 @@ The small config is enough for most users. You can still override a mode:
 
 Mode-specific `duration` wins over `speed`.
 
-## Support
+## Donate
 
 If README Arcade helped your profile, tips are welcome:
 

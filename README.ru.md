@@ -132,7 +132,7 @@ python scripts/render_gallery.py
 
 Если у режима указан свой `duration`, он важнее общего `speed`.
 
-## Support
+## Поддержать Автора
 
 Если README Arcade пригодился для профиля, можно поддержать автора:
 
