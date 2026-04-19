@@ -9,24 +9,11 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/github/actions/workflow/status/ECD5A/README-Arcade/render.yml?branch=main&style=flat-square&label=render" alt="Render workflow">
-  <img src="https://img.shields.io/github/stars/ECD5A/README-Arcade?style=flat-square&label=stars&color=ffd33d" alt="GitHub stars">
-  <img src="https://img.shields.io/github/forks/ECD5A/README-Arcade?style=flat-square&label=forks&color=58a6ff" alt="GitHub forks">
-  <img src="https://img.shields.io/github/last-commit/ECD5A/README-Arcade?style=flat-square&label=updated" alt="Last commit">
-</p>
-
-<p align="center">
   <img src="https://img.shields.io/badge/license-MIT-2da44e?style=flat-square" alt="MIT license">
   <img src="https://img.shields.io/badge/python-3.10%2B-3776ab?style=flat-square&logo=python&logoColor=white" alt="Python 3.10+">
   <img src="https://img.shields.io/badge/dependencies-zero-6f7787?style=flat-square" alt="Zero dependencies">
-  <img src="https://img.shields.io/badge/SVG-animated-ff69b4?style=flat-square" alt="Animated SVG">
   <img src="https://img.shields.io/badge/modes-4-39d353?style=flat-square" alt="Four modes">
   <img src="https://img.shields.io/badge/dark%2Flight-auto-58a6ff?style=flat-square" alt="Auto dark and light theme">
-  <img src="https://img.shields.io/badge/JavaScript-none-6f7787?style=flat-square" alt="No JavaScript">
-</p>
-
-<p align="center">
-  Генерирует парные SVG для темной и светлой темы GitHub. Без JavaScript, frontend-сборки и установки пакетов.
 </p>
 
 ## Галерея
@@ -114,6 +101,7 @@ Profile README лежит в специальном репозитории с и
 ```
 
 Замени `YOUR_LOGIN` в сниппете. Если форк называется не `README-Arcade`, замени и имя репозитория.
+Блок `<picture>` сам подставляет темный или светлый SVG под тему GitHub.
 
 ## Локальный Просмотр
 
