@@ -121,7 +121,7 @@ If README Arcade helped your profile, tips are welcome:
 ```text
 TON: pointoncurve.ton
 BTC: 1ECDSA1b4d5TcZHtqNpcxmY8pBH1GgHntN
-USDT (TRC20): TSWcFVfqCp4WCXrUkkzdCkcLnhtFLNN3Ba
+USDT (TRC20): TUF4vPdB6QkjCvZq18rBL4Qj4dK5ihCN75
 ```
 
 ## License
