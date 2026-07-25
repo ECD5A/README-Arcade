@@ -7,6 +7,7 @@ from html import escape
 from pathlib import Path
 from typing import Any
 
+from readme_arcade.config import output_base_name
 from readme_arcade.github import counts_from_calendar
 from readme_arcade.themes import THEMES
 
@@ -78,7 +79,7 @@ def write_theme_svgs(
     frames_by_theme: dict[str, GridFrames],
 ) -> list[Path]:
     out_dir.mkdir(parents=True, exist_ok=True)
-    base_name = str(config.get("output", {}).get("baseName", "readme-arcade"))
+    base_name = output_base_name(config)
     written: list[Path] = []
 
     for theme_name in ("dark", "light"):
