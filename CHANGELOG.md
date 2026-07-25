@@ -2,6 +2,14 @@
 
 All notable changes to README Arcade are documented in this file.
 
+## [Unreleased]
+
+### Fixed
+
+- Profile README instructions now use relative SVG paths for the recommended
+  same-repository Action setup, so GitHub can resolve both theme assets.
+- Donation details are consistent across the English and Russian documentation.
+
 ## [1.0.0] - 2026-07-26
 
 ### Added

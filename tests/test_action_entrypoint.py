@@ -45,9 +45,28 @@ class ActionEntrypointTests(unittest.TestCase):
             dark = workdir / "generated" / "arcade-test-dark.svg"
             self.assertTrue(light.is_file())
             self.assertTrue(dark.is_file())
+            light_svg = light.read_text(encoding="utf-8")
+            dark_svg = dark.read_text(encoding="utf-8")
+            self.assertNotEqual(light_svg, dark_svg)
+            self.assertIn('fill="#ffffff"', light_svg)
+            self.assertIn('fill="#0d1117"', dark_svg)
             outputs = output_file.read_text(encoding="utf-8")
             self.assertIn("light-svg=generated/arcade-test.svg", outputs)
             self.assertIn("dark-svg=generated/arcade-test-dark.svg", outputs)
+
+    def test_profile_readme_uses_automatic_theme_sources(self) -> None:
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        self.assertIn(
+            '<source media="(prefers-color-scheme: dark)" '
+            'srcset="./dist/readme-arcade-dark.svg">',
+            readme,
+        )
+        self.assertIn(
+            '<source media="(prefers-color-scheme: light)" '
+            'srcset="./dist/readme-arcade.svg">',
+            readme,
+        )
+        self.assertIn('<img src="./dist/readme-arcade.svg"', readme)
 
 
 if __name__ == "__main__":

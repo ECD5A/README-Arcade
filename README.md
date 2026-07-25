@@ -174,20 +174,27 @@ be adjusted in the configuration:
 
 4. Paste this into your profile README.
 
-Your profile README is the `README.md` file inside the special repository named `YOUR_LOGIN/YOUR_LOGIN`.
+Your profile README is the `README.md` file inside the special repository named
+`YOUR_LOGIN/YOUR_LOGIN`. When the workflow and README are in that same
+repository, use relative paths:
 
 ```html
 <p align="center">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/YOUR_LOGIN/README-Arcade/main/dist/readme-arcade-dark.svg">
-    <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/YOUR_LOGIN/README-Arcade/main/dist/readme-arcade.svg">
-    <img src="https://raw.githubusercontent.com/YOUR_LOGIN/README-Arcade/main/dist/readme-arcade.svg" width="920" alt="README Arcade">
+    <source media="(prefers-color-scheme: dark)" srcset="./dist/readme-arcade-dark.svg">
+    <source media="(prefers-color-scheme: light)" srcset="./dist/readme-arcade.svg">
+    <img src="./dist/readme-arcade.svg" width="920" alt="README Arcade">
   </picture>
 </p>
 ```
 
-Replace `YOUR_LOGIN` in the snippet. If your fork has another repository name, replace `README-Arcade` too.
-The `<picture>` block lets GitHub choose the dark or light SVG automatically.
+If the generated files live in a separate repository or fork, replace each
+relative path with its raw URL, for example
+`https://raw.githubusercontent.com/YOUR_LOGIN/README-Arcade/main/dist/readme-arcade-dark.svg`.
+
+The `<picture>` block lets GitHub choose the dark or light SVG automatically for
+each visitor. The normal SVG is also the fallback for clients that do not
+support theme detection.
 
 See every mode running on the
 [live GitHub Pages gallery](https://ecd5a.github.io/README-Arcade/).
