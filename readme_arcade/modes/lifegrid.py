@@ -8,6 +8,7 @@ from html import escape
 from pathlib import Path
 from typing import Any
 
+from readme_arcade.config import output_base_name
 from readme_arcade.github import counts_from_calendar
 from readme_arcade.themes import THEMES
 
@@ -321,7 +322,7 @@ def render(user: str, config: dict[str, Any], calendar: dict | None, out_dir: Pa
     states = evolve(seed, user, options)
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    base_name = str(config.get("output", {}).get("baseName", "readme-arcade"))
+    base_name = output_base_name(config)
     written: list[Path] = []
     for theme_name in ("dark", "light"):
         suffix = "-dark" if theme_name == "dark" else ""

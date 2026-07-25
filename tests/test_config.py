@@ -3,7 +3,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from readme_arcade.config import DEFAULT_CONFIG, load_config
+from readme_arcade.config import DEFAULT_CONFIG, load_config, output_base_name
 
 
 class LoadConfigTests(unittest.TestCase):
@@ -54,6 +54,31 @@ class LoadConfigTests(unittest.TestCase):
 
             with self.assertRaisesRegex(ValueError, "must contain a JSON object"):
                 load_config(path)
+
+
+class OutputBaseNameTests(unittest.TestCase):
+    def test_accepts_portable_filename_stems(self) -> None:
+        config = {"output": {"baseName": "profile_arcade-v2.1"}}
+
+        self.assertEqual(output_base_name(config), "profile_arcade-v2.1")
+
+    def test_rejects_parent_directory_traversal(self) -> None:
+        config = {"output": {"baseName": "../profile"}}
+
+        with self.assertRaisesRegex(ValueError, "output.baseName"):
+            output_base_name(config)
+
+    def test_rejects_path_separators(self) -> None:
+        for value in ("nested/profile", r"nested\profile"):
+            with self.subTest(value=value):
+                with self.assertRaisesRegex(ValueError, "output.baseName"):
+                    output_base_name({"output": {"baseName": value}})
+
+    def test_rejects_empty_and_overlong_names(self) -> None:
+        for value in ("", "a" * 129):
+            with self.subTest(value=value):
+                with self.assertRaisesRegex(ValueError, "output.baseName"):
+                    output_base_name({"output": {"baseName": value}})
 
 
 if __name__ == "__main__":

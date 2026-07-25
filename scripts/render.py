@@ -11,7 +11,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from readme_arcade.config import load_config
+from readme_arcade.config import load_config, output_base_name
 from readme_arcade.github import fetch_calendar
 from readme_arcade.modes import defrag, lifegrid, matrix, snake
 
@@ -41,6 +41,7 @@ def main() -> None:
     mode = args.mode or str(config.get("mode") or "lifegrid")
     if args.base_name:
         config.setdefault("output", {})["baseName"] = args.base_name
+    output_base_name(config)
 
     renderer = MODES.get(mode)
     if not renderer:

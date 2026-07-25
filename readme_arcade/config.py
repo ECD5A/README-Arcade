@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import re
 from copy import deepcopy
 from pathlib import Path
 from typing import Any
@@ -121,6 +122,20 @@ SPEED_PRESETS: dict[str, dict[str, str]] = {
         "defrag": "26s",
     },
 }
+
+
+OUTPUT_NAME_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$")
+
+
+def output_base_name(config: dict[str, Any]) -> str:
+    """Return a safe filename stem for generated SVG assets."""
+    value = str(config.get("output", {}).get("baseName", "readme-arcade"))
+    if not OUTPUT_NAME_PATTERN.fullmatch(value):
+        raise ValueError(
+            "output.baseName must start with an ASCII letter or digit and contain "
+            "only letters, digits, dots, underscores, or hyphens (128 characters max)"
+        )
+    return value
 
 
 def deep_merge(base: dict[str, Any], override: dict[str, Any]) -> dict[str, Any]:
