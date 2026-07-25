@@ -1,10 +1,16 @@
 name: render README Arcade
 
 on:
+  schedule:
+    - cron: "17 3 * * *"
   workflow_dispatch:
     inputs:
       user:
         description: "Optional GitHub login override"
+        required: false
+        type: string
+      seed:
+        description: "Optional animation route seed"
         required: false
         type: string
   push:
@@ -36,7 +42,14 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           README_ARCADE_USER: ${{ github.event.inputs.user }}
+          REQUESTED_SEED: ${{ github.event.inputs.seed }}
         run: |
+          if [ -n "$REQUESTED_SEED" ]; then
+            export README_ARCADE_SEED="$REQUESTED_SEED"
+          else
+            export README_ARCADE_SEED="$(date -u +%F)"
+          fi
+          echo "Rendering daily route seed: $README_ARCADE_SEED"
           python scripts/render.py --config readme-arcade.config.json --out-dir dist
           python scripts/render_gallery.py
 

@@ -25,6 +25,9 @@ GALLERY_MODES = {
 
 def main() -> None:
     config = load_config(Path("readme-arcade.config.json"))
+    seed = os.environ.get("README_ARCADE_SEED")
+    if seed:
+        config.setdefault("snake", {})["seed"] = seed
     user = os.environ.get("README_ARCADE_USER") or str(config.get("user") or "README")
     calendar = fetch_calendar(user, os.environ.get("GITHUB_TOKEN"))
     out_dir = Path("dist") / "gallery"

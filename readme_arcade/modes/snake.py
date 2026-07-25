@@ -65,6 +65,10 @@ def stable_byte(user: str, salt: str) -> int:
     return hashlib.sha256(f"{user}:{salt}".encode("utf-8")).digest()[0]
 
 
+def motion_key(user: str, seed: str) -> str:
+    return f"{user}:route:{seed}" if seed else user
+
+
 def manhattan(a: Position, b: Position) -> int:
     return abs(a[0] - b[0]) + abs(a[1] - b[1])
 
@@ -432,6 +436,7 @@ def choose_step(
     food: dict[Position, int],
     theme_name: str,
     blocked: set[Position] | None = None,
+    min_actor_distance: int = 3,
     last_direction: tuple[int, int] | None = None,
     direction_run: int = 0,
 ) -> Position:
@@ -469,6 +474,10 @@ def choose_step(
         if pos in body_block:
             continue
 
+        separation_penalty = 0
+        if blocked and min_actor_distance > 0:
+            nearest_actor = min(manhattan(pos, occupied) for occupied in blocked)
+            separation_penalty = max(0, min_actor_distance - nearest_actor)
         eating_priority = 0 if pos in food else 1
         eating_level = darkness_priority(food[pos], theme_name) if pos in food else 9
         next_distance = manhattan(pos, target)
@@ -496,6 +505,7 @@ def choose_step(
         candidates.append(
             (
                 (
+                    separation_penalty,
                     eating_priority,
                     eating_level,
                     progress_penalty,
@@ -549,6 +559,7 @@ def advance_actor(
     grow_per_food: int,
     growth: int,
     blocked: set[Position] | None = None,
+    min_actor_distance: int = 3,
     last_direction: tuple[int, int] | None = None,
     direction_run: int = 0,
     edge_run_frame: int = 0,
@@ -569,6 +580,7 @@ def advance_actor(
         food,
         theme_name,
         blocked,
+        min_actor_distance,
         last_direction,
         direction_run,
     )
@@ -693,15 +705,17 @@ def build_frames(user: str, options: dict[str, Any], calendar: dict | None, them
     worm_max_length = max(worm_length, int(options.get("wormMaxLength", 5)))
     worm_speed = min(max(1, int(options.get("wormSpeed", 2))), 4)
     worm_grow_per_food = max(0, int(options.get("wormGrowPerFood", 0)))
+    min_actor_distance = max(0, int(options.get("minActorDistance", 3)))
+    route_key = motion_key(user, str(options.get("seed", "")))
 
     letter_food = name_food(user, width, height)
-    body = body_from_name_cells(user, letter_food, "snake", start_length, width, height)
+    body = body_from_name_cells(route_key, letter_food, "snake", start_length, width, height)
     worm_body: list[Position] = []
     if worm_enabled:
-        worm_body = body_from_name_cells(user, letter_food, "worm", worm_length, width, height, set(body))
+        worm_body = body_from_name_cells(route_key, letter_food, "worm", worm_length, width, height, set(body))
 
     blocked = set(body) | set(worm_body)
-    field_food = build_food(user, width, height, calendar, blocked | set(letter_food))
+    field_food = build_food(route_key, width, height, calendar, blocked | set(letter_food))
     food = {pos: level for pos, level in letter_food.items() if pos not in blocked}
 
     rendered: list[list[list[str]]] = [name_grid(user, width, height, theme) for _ in range(intro_frames)]
@@ -710,7 +724,7 @@ def build_frames(user: str, options: dict[str, Any], calendar: dict | None, them
         birth_actors.insert(0, (worm_colors, worm_body, 0.08))
     for frame in range(birth_frames):
         reveal_step = min(frame, field_reveal_frames - 1)
-        reveal_field_food(user, food, field_food, reveal_step, field_reveal_frames, set(body) | set(worm_body))
+        reveal_field_food(route_key, food, field_food, reveal_step, field_reveal_frames, set(body) | set(worm_body))
         rendered.append(render_birth_frame(user, theme, birth_actors, width, height, food, frame, birth_frames))
 
     growth = 0
@@ -722,17 +736,17 @@ def build_frames(user: str, options: dict[str, Any], calendar: dict | None, them
 
     for frame in range(frames - len(rendered)):
         reveal_step = min(birth_frames + frame, field_reveal_frames - 1)
-        reveal_field_food(user, food, field_food, reveal_step, field_reveal_frames, set(body) | set(worm_body))
-        feed_next_edge_cell(user, food, body, "snake", width, height, frame, edge_run_delay, edge_run_frames, set(worm_body))
+        reveal_field_food(route_key, food, field_food, reveal_step, field_reveal_frames, set(body) | set(worm_body))
+        feed_next_edge_cell(route_key, food, body, "snake", width, height, frame, edge_run_delay, edge_run_frames, set(worm_body))
         if worm_enabled:
-            feed_next_edge_cell(user, food, worm_body, "worm", width, height, frame, edge_run_delay, edge_run_frames, set(body))
+            feed_next_edge_cell(route_key, food, worm_body, "worm", width, height, frame, edge_run_delay, edge_run_frames, set(body))
 
         actors = [(worm_colors, worm_body), (snake_colors, body)] if worm_enabled else [(snake_colors, body)]
         rendered.append(render_game_frame(theme, actors, width, height, food))
 
         before_food = set(food)
         growth, snake_direction, snake_run = advance_actor(
-            user,
+            route_key,
             "snake",
             frame,
             body,
@@ -744,6 +758,7 @@ def build_frames(user: str, options: dict[str, Any], calendar: dict | None, them
             grow_per_food,
             growth,
             set(worm_body),
+            min_actor_distance,
             snake_direction,
             snake_run,
             frame,
@@ -759,7 +774,7 @@ def build_frames(user: str, options: dict[str, Any], calendar: dict | None, them
             for substep in range(current_worm_speed):
                 before_food = set(food)
                 worm_growth, worm_direction, worm_run = advance_actor(
-                    user,
+                    route_key,
                     "worm",
                     (frame * worm_speed) + substep,
                     worm_body,
@@ -771,6 +786,7 @@ def build_frames(user: str, options: dict[str, Any], calendar: dict | None, them
                     worm_grow_per_food,
                     worm_growth,
                     set(body),
+                    min_actor_distance,
                     worm_direction,
                     worm_run,
                     frame,
@@ -806,6 +822,7 @@ def render(user: str, config: dict[str, Any], calendar: dict | None, out_dir: Pa
     options.setdefault("wormMaxLength", 5)
     options.setdefault("wormSpeed", 2)
     options.setdefault("wormGrowPerFood", 0)
+    options.setdefault("minActorDistance", 3)
     options.setdefault("width", 53)
     options.setdefault("height", 7)
 
