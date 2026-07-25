@@ -174,20 +174,27 @@ Fork остаётся лучшим вариантом, если хочется �
 
 4. Вставь это в свой profile README.
 
-Profile README лежит в специальном репозитории с именем `YOUR_LOGIN/YOUR_LOGIN`.
+Profile README лежит в специальном репозитории с именем
+`YOUR_LOGIN/YOUR_LOGIN`. Если workflow и README находятся в этом же
+репозитории, используй относительные пути:
 
 ```html
 <p align="center">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/YOUR_LOGIN/README-Arcade/main/dist/readme-arcade-dark.svg">
-    <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/YOUR_LOGIN/README-Arcade/main/dist/readme-arcade.svg">
-    <img src="https://raw.githubusercontent.com/YOUR_LOGIN/README-Arcade/main/dist/readme-arcade.svg" width="920" alt="README Arcade">
+    <source media="(prefers-color-scheme: dark)" srcset="./dist/readme-arcade-dark.svg">
+    <source media="(prefers-color-scheme: light)" srcset="./dist/readme-arcade.svg">
+    <img src="./dist/readme-arcade.svg" width="920" alt="README Arcade">
   </picture>
 </p>
 ```
 
-Замени `YOUR_LOGIN` в сниппете. Если форк называется не `README-Arcade`, замени и имя репозитория.
-Блок `<picture>` сам подставляет темный или светлый SVG под тему GitHub.
+Если SVG находятся в отдельном репозитории или форке, замени каждый
+относительный путь на raw URL, например
+`https://raw.githubusercontent.com/YOUR_LOGIN/README-Arcade/main/dist/readme-arcade-dark.svg`.
+
+Блок `<picture>` автоматически подставляет тёмный или светлый SVG под тему
+каждого посетителя. Обычный SVG остаётся fallback для клиентов без определения
+темы.
 
 Все режимы можно посмотреть в
 [живой GitHub Pages-галерее](https://ecd5a.github.io/README-Arcade/).
@@ -222,7 +229,7 @@ python scripts/render_gallery.py
 ```text
 TON: pointoncurve.ton
 BTC: 1ECDSA1b4d5TcZHtqNpcxmY8pBH1GgHntN
-USDT (TRC20): TSWcFVfqCp4WCXrUkkzdCkcLnhtFLNN3Ba
+USDT (TRC20): TUF4vPdB6QkjCvZq18rBL4Qj4dK5ihCN75
 ```
 
 ## Лицензия
