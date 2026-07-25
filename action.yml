@@ -1,0 +1,69 @@
+name: README Arcade
+author: ECD5A
+description: Generate animated GitHub contribution-grid SVG art for profile READMEs.
+
+inputs:
+  user:
+    description: GitHub login whose contribution calendar should be rendered.
+    required: false
+  mode:
+    description: Render mode (lifegrid, snake, matrix, or defrag). The config value is used when omitted.
+    required: false
+  speed:
+    description: Speed preset (slow, normal, fast, or turbo). The config value is used when omitted.
+    required: false
+  config:
+    description: Path to a README Arcade JSON config in the caller repository.
+    required: false
+    default: readme-arcade.config.json
+  output-dir:
+    description: Directory where the light and dark SVG files are written.
+    required: false
+    default: dist
+  base-name:
+    description: Optional output filename stem override.
+    required: false
+  seed:
+    description: Optional deterministic animation seed. Defaults to the current UTC date.
+    required: false
+  github-token:
+    description: Token used to read the GitHub contribution calendar.
+    required: false
+  python-version:
+    description: Python version used to run the zero-dependency renderer.
+    required: false
+    default: "3.13"
+
+outputs:
+  light-svg:
+    description: Path to the generated light-theme SVG.
+    value: ${{ steps.render.outputs.light-svg }}
+  dark-svg:
+    description: Path to the generated dark-theme SVG.
+    value: ${{ steps.render.outputs.dark-svg }}
+
+runs:
+  using: composite
+  steps:
+    - name: Set up Python
+      uses: actions/setup-python@v7
+      with:
+        python-version: ${{ inputs.python-version }}
+
+    - name: Render README Arcade
+      id: render
+      shell: bash
+      env:
+        INPUT_USER: ${{ inputs.user }}
+        INPUT_MODE: ${{ inputs.mode }}
+        INPUT_SPEED: ${{ inputs.speed }}
+        INPUT_CONFIG: ${{ inputs.config }}
+        INPUT_OUTPUT_DIR: ${{ inputs.output-dir }}
+        INPUT_BASE_NAME: ${{ inputs.base-name }}
+        INPUT_SEED: ${{ inputs.seed }}
+        INPUT_GITHUB_TOKEN: ${{ inputs.github-token || github.token }}
+      run: python "$GITHUB_ACTION_PATH/scripts/action_entrypoint.py"
+
+branding:
+  icon: play
+  color: green

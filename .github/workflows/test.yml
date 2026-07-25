@@ -34,3 +34,19 @@ jobs:
               --base-name "$mode" \
               --out-dir ".test-dist/$mode"
           done
+
+      - name: Smoke-test the published action
+        uses: ./
+        with:
+          user: ECD5A
+          mode: snake
+          speed: turbo
+          base-name: action-smoke
+          output-dir: .test-action
+          seed: ci-smoke
+
+      - name: Verify action outputs
+        shell: bash
+        run: |
+          test -s .test-action/action-smoke.svg
+          test -s .test-action/action-smoke-dark.svg

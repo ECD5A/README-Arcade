@@ -70,6 +70,76 @@ Code rain падает поверх твоего ника.
 
 ## Быстрый Старт
 
+### Подключение как GitHub Action
+
+Добавь файл `.github/workflows/readme-arcade.yml` в профильный репозиторий
+или в другой репозиторий, где будут храниться сгенерированные SVG:
+
+```yaml
+name: README Arcade
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 3 * * *"
+
+permissions:
+  contents: write
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Generate arcade SVG
+        uses: ECD5A/README-Arcade@v1
+        with:
+          user: YOUR_LOGIN
+          mode: snake
+          speed: normal
+
+      - name: Commit generated SVG
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add dist
+          git diff --cached --quiet || git commit -m "Update README Arcade"
+          git push
+```
+
+Замени `YOUR_LOGIN`, закоммить workflow и один раз запусти его во вкладке
+Actions. Action создаст `dist/readme-arcade.svg` и
+`dist/readme-arcade-dark.svg` в твоём репозитории. Запуск по расписанию
+обновляет contribution grid каждый день. Маршруты Snake по умолчанию используют
+текущую UTC-дату как seed и тоже меняются ежедневно.
+
+Используй `ECD5A/README-Arcade@v1` для совместимых обновлений первой версии или
+`ECD5A/README-Arcade@v1.0.0` для полностью зафиксированной установки.
+
+#### Параметры Action
+
+| Параметр | По умолчанию | Назначение |
+| --- | --- | --- |
+| `user` | владелец репозитория | GitHub-логин для генерации |
+| `mode` | config или `lifegrid` | `lifegrid`, `snake`, `matrix` или `defrag` |
+| `speed` | config или `normal` | `slow`, `normal`, `fast` или `turbo` |
+| `config` | `readme-arcade.config.json` | Необязательный JSON-config в твоём репозитории |
+| `output-dir` | `dist` | Каталог для SVG |
+| `base-name` | config или `readme-arcade` | Основа имени файлов |
+| `seed` | текущая UTC-дата | Воспроизводимый seed анимации |
+| `github-token` | workflow token | Токен для чтения contributions |
+| `python-version` | `3.13` | Версия Python для renderer |
+
+Action возвращает outputs `light-svg` и `dark-svg` с путями к созданным файлам.
+Он генерирует SVG, а правила коммита и push остаются под контролем твоего workflow.
+
+### Fork для полной кастомизации
+
+Fork остаётся лучшим вариантом, если хочется менять renderer, создавать
+собственные режимы или поддерживать глубоко изменённую сборку.
+
 1. Сделай fork этого репозитория.
 
 2. Открой `readme-arcade.config.json` и поменяй три поля:
@@ -88,9 +158,8 @@ Code rain падает поверх твоего ника.
 
 Если Actions отключены в форке, открой вкладку Actions, включи workflows и один раз запусти `render README Arcade`.
 
-Workflow также запускается раз в сутки. Маршруты Snake используют текущую дату
-UTC как seed: каждый день анимация меняется, но в течение дня остаётся
-воспроизводимой. При ручном запуске можно указать собственный `seed`.
+Встроенный workflow также запускается раз в сутки. При ручном запуске можно
+указать собственный `seed`.
 
 По умолчанию минимальная дистанция между змейкой и червяком равна трём клеткам.
 Её можно изменить в конфигурации:
@@ -119,6 +188,9 @@ Profile README лежит в специальном репозитории с и
 
 Замени `YOUR_LOGIN` в сниппете. Если форк называется не `README-Arcade`, замени и имя репозитория.
 Блок `<picture>` сам подставляет темный или светлый SVG под тему GitHub.
+
+Все режимы можно посмотреть в
+[живой GitHub Pages-галерее](https://ecd5a.github.io/README-Arcade/).
 
 ## Локальный Просмотр
 
