@@ -16,6 +16,14 @@
   <img src="https://img.shields.io/badge/dark%2Flight-auto-58a6ff?style=flat-square" alt="Auto dark and light theme">
 </p>
 
+<p align="center">
+  <a href="#quick-start">Quick Start</a> ·
+  <a href="#gallery">Gallery</a> ·
+  <a href="./CONTRIBUTING.md">Contributing</a> ·
+  <a href="./SECURITY.md">Security</a> ·
+  <a href="./SUPPORT.md">Support</a>
+</p>
+
 ## Gallery
 
 ### Lifegrid
@@ -113,6 +121,15 @@ python scripts/render_gallery.py
 ```
 
 Open `preview/index.html` to view all modes.
+
+## Contributing and Security
+
+Contributions are welcome. Read [CONTRIBUTING.md](CONTRIBUTING.md) before
+opening a pull request. Use the structured issue forms for reproducible bugs
+and focused feature requests.
+
+Do not disclose vulnerabilities in public issues. Follow
+[SECURITY.md](SECURITY.md) to submit a private report through GitHub.
 
 ## Donate
 

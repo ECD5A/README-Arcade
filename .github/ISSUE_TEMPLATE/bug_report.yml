@@ -1,0 +1,68 @@
+name: Bug report
+description: Report a reproducible problem in rendering, configuration, or automation
+title: "[Bug]: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Do not include tokens or private data. Report vulnerabilities through the private security link instead.
+  - type: dropdown
+    id: environment
+    attributes:
+      label: Environment
+      options:
+        - GitHub Actions
+        - Local Python
+        - Both
+    validations:
+      required: true
+  - type: dropdown
+    id: mode
+    attributes:
+      label: Mode
+      options:
+        - lifegrid
+        - snake
+        - matrix
+        - defrag
+        - All modes
+        - Not mode-specific
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: Describe the expected and actual behavior.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Minimal reproduction
+      description: Include the smallest safe configuration and exact commands or workflow steps.
+      render: shell
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant output
+      description: Paste error output or an Actions run URL. Remove tokens and private data.
+      render: text
+  - type: input
+    id: python
+    attributes:
+      label: Python version
+      placeholder: "3.13"
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Submission checks
+      options:
+        - label: I searched existing issues for the same problem.
+          required: true
+        - label: This report does not contain credentials or private data.
+          required: true
