@@ -33,14 +33,18 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7
 
-      - name: Set up Python
-        uses: actions/setup-python@v7
-        with:
-          python-version: "3.13"
-
       - name: Render SVG
+        uses: ./
+        with:
+          user: ${{ github.event.inputs.user }}
+          seed: ${{ github.event.inputs.seed }}
+          config: readme-arcade.config.json
+          output-dir: dist
+
+      - name: Render gallery
+        shell: bash
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ github.token }}
           README_ARCADE_USER: ${{ github.event.inputs.user }}
           REQUESTED_SEED: ${{ github.event.inputs.seed }}
         run: |
@@ -49,8 +53,6 @@ jobs:
           else
             export README_ARCADE_SEED="$(date -u +%F)"
           fi
-          echo "Rendering daily route seed: $README_ARCADE_SEED"
-          python scripts/render.py --config readme-arcade.config.json --out-dir dist
           python scripts/render_gallery.py
 
       - name: Commit generated SVG

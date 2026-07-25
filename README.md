@@ -70,6 +70,76 @@ A Windows 98-style disk map compacts fragmented cells.
 
 ## Quick Start
 
+### Use the GitHub Action
+
+Add `.github/workflows/readme-arcade.yml` to your profile repository or any
+repository that will store the generated SVG files:
+
+```yaml
+name: README Arcade
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 3 * * *"
+
+permissions:
+  contents: write
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Generate arcade SVG
+        uses: ECD5A/README-Arcade@v1
+        with:
+          user: YOUR_LOGIN
+          mode: snake
+          speed: normal
+
+      - name: Commit generated SVG
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add dist
+          git diff --cached --quiet || git commit -m "Update README Arcade"
+          git push
+```
+
+Replace `YOUR_LOGIN`, commit the workflow, and run it once from the Actions tab.
+The Action writes `dist/readme-arcade.svg` and
+`dist/readme-arcade-dark.svg` into your repository. The scheduled run refreshes
+the contribution data daily. Snake routes use the current UTC date as their
+default seed, so they also change daily.
+
+Use `ECD5A/README-Arcade@v1` for compatible v1 updates or pin
+`ECD5A/README-Arcade@v1.0.0` for an immutable setup.
+
+#### Action inputs
+
+| Input | Default | Description |
+| --- | --- | --- |
+| `user` | repository owner | GitHub login to render |
+| `mode` | config or `lifegrid` | `lifegrid`, `snake`, `matrix`, or `defrag` |
+| `speed` | config or `normal` | `slow`, `normal`, `fast`, or `turbo` |
+| `config` | `readme-arcade.config.json` | Optional JSON config in your repository |
+| `output-dir` | `dist` | Destination directory |
+| `base-name` | config or `readme-arcade` | Output filename stem |
+| `seed` | current UTC date | Deterministic animation seed |
+| `github-token` | workflow token | Token used to read contributions |
+| `python-version` | `3.13` | Python version used by the renderer |
+
+The Action exposes `light-svg` and `dark-svg` outputs with the generated paths.
+It generates files but deliberately leaves the commit policy to your workflow.
+
+### Fork for full customization
+
+Forking remains the best option when you want to change the renderer, create a
+new mode, or maintain a deeply customized build.
+
 1. Fork this repository.
 
 2. Open `readme-arcade.config.json` and change three fields:
@@ -88,9 +158,8 @@ A Windows 98-style disk map compacts fragmented cells.
 
 If Actions are disabled in your fork, open the Actions tab, enable workflows, then run `render README Arcade` once.
 
-The workflow also runs once per day. Snake routes use the current UTC date as
-a seed, so the animation changes daily while remaining reproducible for that
-day. A manual workflow run can provide a custom `seed`.
+The included workflow also runs once per day. A manual run can provide a custom
+`seed`.
 
 The default minimum distance between the snake and worm is three cells. It can
 be adjusted in the configuration:
@@ -119,6 +188,9 @@ Your profile README is the `README.md` file inside the special repository named 
 
 Replace `YOUR_LOGIN` in the snippet. If your fork has another repository name, replace `README-Arcade` too.
 The `<picture>` block lets GitHub choose the dark or light SVG automatically.
+
+See every mode running on the
+[live GitHub Pages gallery](https://ecd5a.github.io/README-Arcade/).
 
 ## Local Preview
 
