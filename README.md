@@ -16,14 +16,6 @@
   <img src="https://img.shields.io/badge/dark%2Flight-auto-58a6ff?style=flat-square" alt="Auto dark and light theme">
 </p>
 
-<p align="center">
-  <a href="#quick-start">Quick Start</a> ·
-  <a href="#gallery">Gallery</a> ·
-  <a href="./CONTRIBUTING.md">Contributing</a> ·
-  <a href="./SECURITY.md">Security</a> ·
-  <a href="./SUPPORT.md">Support</a>
-</p>
-
 ## Gallery
 
 ### Lifegrid
