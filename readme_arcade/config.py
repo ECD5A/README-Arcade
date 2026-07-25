@@ -53,6 +53,7 @@ DEFAULT_CONFIG: dict[str, Any] = {
         "wormMaxLength": 5,
         "wormSpeed": 2,
         "wormGrowPerFood": 0,
+        "minActorDistance": 3,
         "titleLeft": "SNAKE",
         "titleRight": "",
         "cellSize": 13,

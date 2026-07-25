@@ -1,5 +1,8 @@
 {
   "user": "YOUR_LOGIN",
   "mode": "snake",
-  "speed": "normal"
+  "speed": "normal",
+  "snake": {
+    "minActorDistance": 3
+  }
 }

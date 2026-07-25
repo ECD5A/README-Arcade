@@ -31,6 +31,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--user", default=None, help="Override the configured GitHub user/login.")
     parser.add_argument("--mode", default=None, help="Override the configured mode.")
     parser.add_argument("--base-name", default=None, help="Override output base name.")
+    parser.add_argument("--seed", default=None, help="Override the animation route seed.")
     return parser.parse_args()
 
 
@@ -41,6 +42,9 @@ def main() -> None:
     mode = args.mode or str(config.get("mode") or "lifegrid")
     if args.base_name:
         config.setdefault("output", {})["baseName"] = args.base_name
+    seed = args.seed or os.environ.get("README_ARCADE_SEED")
+    if seed:
+        config.setdefault("snake", {})["seed"] = seed
     output_base_name(config)
 
     renderer = MODES.get(mode)

@@ -41,6 +41,8 @@ Conway's Game of Life starts from your GitHub login.
 ### Snake
 
 A snake and a fast worm appear from your login and eat GitHub-colored cells.
+Their route changes with the daily render seed, and separation rules keep them
+from spending most of the animation side by side.
 
 <p align="center">
   <picture>
@@ -94,6 +96,21 @@ A Windows 98-style disk map compacts fragmented cells.
 
 If Actions are disabled in your fork, open the Actions tab, enable workflows, then run `render README Arcade` once.
 
+The workflow also runs once per day. Snake routes use the current UTC date as
+a seed, so the animation changes daily while remaining reproducible for that
+day. A manual workflow run can provide a custom `seed`.
+
+The default minimum distance between the snake and worm is three cells. It can
+be adjusted in the configuration:
+
+```json
+{
+  "snake": {
+    "minActorDistance": 3
+  }
+}
+```
+
 4. Paste this into your profile README.
 
 Your profile README is the `README.md` file inside the special repository named `YOUR_LOGIN/YOUR_LOGIN`.
@@ -119,6 +136,9 @@ You do not need local setup if you use GitHub Actions. Local render is optional:
 python scripts/render.py
 python scripts/render_gallery.py
 ```
+
+Use `python scripts/render.py --mode snake --seed demo` to preview a specific
+route locally.
 
 Open `preview/index.html` to view all modes.
 
