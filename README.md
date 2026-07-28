@@ -116,7 +116,7 @@ the contribution data daily. Snake routes use the current UTC date as their
 default seed, so they also change daily.
 
 Use `ECD5A/README-Arcade@v1` for compatible v1 updates or pin
-`ECD5A/README-Arcade@v1.0.0` for an immutable setup.
+`ECD5A/README-Arcade@v1.0.1` for an immutable setup with the latest v1 fixes.
 
 #### Action inputs
 
